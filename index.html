@@ -507,11 +507,16 @@
       const changeSt = Math.round((paidTotal - billBGN) * 100);
 
       if (changeSt < 0) {
-        eurEl.textContent = "0.00";
-        bgnEl.textContent = "0.00";
-        setWarn(`Недостатъчна сума: липсват ${(Math.abs(changeSt)/100).toFixed(2)} лв.`);
-        return;
-      }
+  eurEl.textContent = "0.00";
+  bgnEl.textContent = "0.00";
+
+  const missingBGN = Math.abs(changeSt) / 100;
+  const missingEUR = (missingBGN / RATE).toFixed(2);
+
+  setWarn(`Недостатъчна сума: липсват ${missingBGN.toFixed(2)} лв (или ${missingEUR} EUR).`);
+  return;
+}
+
 
       const changeBGN = changeSt / 100;
       const eurRounded = Math.round((changeBGN / RATE) * 100) / 100;
