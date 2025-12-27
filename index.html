@@ -60,7 +60,6 @@
     .row{display:grid; gap:8px}
     .note{font-size: 13px; color: var(--muted); margin-top: 2px}
 
-    /* Лента: Натиснати + Махни последната */
     .pickedRow{
       display:flex;
       align-items:stretch;
@@ -91,7 +90,6 @@
       overflow-wrap:anywhere;
     }
 
-    /* Банкноти: 2 реда по 4 */
     .banknotes{
       display:grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -140,17 +138,20 @@
       border-radius: 14px;
       border: 1px solid var(--border);
       background: rgba(37,99,235,.06);
+      display:grid;
+      gap:10px;
     }
-    .big{
+    .kpi .small{color: var(--muted); font-size: 13px}
+    .kpi .big{
       font-size: 34px;
       font-weight: 900;
       letter-spacing: -.5px;
-      margin: 2px 0 4px;
+      margin: 2px 0 0;
       line-height: 1.1;
       font-variant-numeric: tabular-nums;
     }
-    .small{color: var(--muted); font-size: 13px}
     .warn{color: var(--warn)}
+    #info{color: var(--muted); font-size: 13px}
 
     .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
     button.action{
@@ -187,7 +188,8 @@
   <main class="card">
     <h1>Ресто в евро</h1>
     <p class="hint">
-      Въвеждаш сметката (лв) и даденото (лв). Получаваш ресто в <b>EUR</b> по курс <b>1.95583</b>.
+      Въвеждаш сметката (лв) и даденото (лв). Връща се <b>EUR</b> (до 2 знака, закръглено надолу) + <b>остатък в лева</b>.
+      Курс: <b>1.95583</b>.
     </p>
 
     <div class="grid">
@@ -201,7 +203,6 @@
         <input id="paid" inputmode="decimal" placeholder="напр. 50.00" />
         <div class="note">Натискай банкноти/монети – добавят се към “Дадени пари” и се изписват отдолу.</div>
 
-        <!-- Натиснати (ляво) + Махни последната (дясно) -->
         <div class="pickedRow" aria-live="polite">
           <div class="picked">
             <div class="title">Натиснати:</div>
@@ -210,7 +211,6 @@
           <button class="action ghost" id="undoBtn" type="button">← Махни последната</button>
         </div>
 
-        <!-- Снимкови бутони (2 реда по 4) -->
         <div class="banknotes" id="banknotes">
           <!-- Смени src с твоите картинки -->
           <button class="bn" type="button" data-value="0.5" data-label="0.50">
@@ -259,10 +259,19 @@
         </div>
       </div>
 
+      <!-- Резултат: EUR + остатък BGN -->
       <div class="result" aria-live="polite">
-        <div class="small">Ресто за връщане (EUR)</div>
-        <div id="eur" class="big">0.00</div>
-        <div id="info" class="small"></div>
+        <div class="kpi">
+          <div class="small">Ресто за връщане (EUR)</div>
+          <div id="eur" class="big">0.00</div>
+        </div>
+
+        <div class="kpi">
+          <div class="small">Ресто за връщане (BGN остатък)</div>
+          <div id="bgnLeft" class="big">0.00</div>
+        </div>
+
+        <div id="info"></div>
       </div>
 
       <div class="btns">
@@ -277,7 +286,9 @@
 
     const billEl = document.getElementById('bill');
     const paidEl = document.getElementById('paid');
-    const eurEl  = document.getElementById('eur');
+
+    const eurEl = document.getElementById('eur');
+    const bgnLeftEl = document.getElementById('bgnLeft');
     const infoEl = document.getElementById('info');
 
     const banknotesWrap = document.getElementById('banknotes');
@@ -288,8 +299,7 @@
     const clearPaidBtn = document.getElementById('clearPaidBtn');
     const clearAllBtn = document.getElementById('clearAllBtn');
 
-    // Натиснати банкноти/монети: [{value, label}]
-    const picked = [];
+    const picked = []; // [{value, label}]
 
     function parseBGNumber(value){
       if (typeof value !== 'string') return NaN;
@@ -297,8 +307,14 @@
       return v === '' ? NaN : Number(v);
     }
 
+    // Винаги работим със стотинки (2 знака)
     function round2(n){ return Math.round(n * 100) / 100; }
     function fmt2(n){ return round2(n).toFixed(2); }
+
+    // EUR се връща в евро-центове, но без да “надскача” (floor)
+    function floorToCents(eur){
+      return Math.floor(eur * 100 + 1e-9) / 100; // малка защита от floating грешки
+    }
 
     function clearWarn(){ infoEl.classList.remove('warn'); }
     function setWarn(text){
@@ -312,7 +328,6 @@
 
     function updatePickedUI(){
       pickedListEl.textContent = picked.length ? picked.map(x => x.label).join(", ") : "—";
-      // полето "Дадени пари" = сумата от натиснатите банкноти
       paidEl.value = fmt2(pickedSum());
     }
 
@@ -324,6 +339,7 @@
 
       if (!Number.isFinite(bill) || !Number.isFinite(paid)) {
         eurEl.textContent = "0.00";
+        bgnLeftEl.textContent = "0.00";
         setWarn("Въведи валидни числа (можеш и със запетая).");
         return;
       }
@@ -332,13 +348,30 @@
 
       if (changeBGN < 0) {
         eurEl.textContent = "0.00";
+        bgnLeftEl.textContent = "0.00";
         setWarn(`Недостатъчна сума: липсват ${fmt2(Math.abs(changeBGN))} лв.`);
         return;
       }
 
-      const changeEUR = changeBGN / RATE;
-      eurEl.textContent = fmt2(changeEUR);
-      infoEl.textContent = `Ресто: ${fmt2(changeBGN)} лв ÷ ${RATE} = ${fmt2(changeEUR)} EUR`;
+      // 1) Колко евро се падат точно
+      const exactEUR = changeBGN / RATE;
+
+      // 2) Връщаме евро ЗАКРЪГЛЕНО НАДОЛУ до 0.01 EUR (за да не дадем повече)
+      const eurReturn = floorToCents(exactEUR);
+
+      // 3) Колко лева покриват тези евро (закръгляме до стотинки)
+      const bgnCovered = round2(eurReturn * RATE);
+
+      // 4) Остатък в лева (ако има)
+      let bgnLeft = round2(changeBGN - bgnCovered);
+      if (bgnLeft < 0) bgnLeft = 0; // защита от микроскопични отрицателни стойности
+
+      eurEl.textContent = fmt2(eurReturn);
+      bgnLeftEl.textContent = fmt2(bgnLeft);
+
+      // инфо (по желание, за проверка)
+      infoEl.textContent =
+        `Общо ресто: ${fmt2(changeBGN)} лв → EUR: ${fmt2(eurReturn)} + остатък: ${fmt2(bgnLeft)} лв`;
     }
 
     function addPicked(value, label){
@@ -358,14 +391,12 @@
 
     function clearPaid(){
       picked.length = 0;
-      updatePickedUI(); // ще стане 0.00
       paidEl.value = '';
       pickedListEl.textContent = "—";
       calculate();
       paidEl.focus();
     }
 
-    // Клик по банкнота/монета (delegation)
     banknotesWrap.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-value]');
       if (!btn) return;
@@ -376,7 +407,7 @@
       if (Number.isFinite(value)) addPicked(value, label);
     });
 
-    // Ако се пише ръчно в "Дадени пари" — чистим списъка "Натиснати" (за да няма разминаване)
+    // ако се пише ръчно -> чистим списъка, за да няма разминаване
     paidEl.addEventListener('input', () => {
       if (document.activeElement === paidEl) {
         picked.length = 0;
@@ -395,6 +426,7 @@
       paidEl.value = '';
       pickedListEl.textContent = "—";
       eurEl.textContent = "0.00";
+      bgnLeftEl.textContent = "0.00";
       infoEl.textContent = '';
       clearWarn();
       billEl.focus();
@@ -406,4 +438,3 @@
   </script>
 </body>
 </html>
-
