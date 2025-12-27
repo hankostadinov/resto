@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ресто (EUR или BGN) — курс 1.95583</title>
+
   <style>
     :root{
       --bg:#f6f8fc;
@@ -14,264 +15,276 @@
       --shadow: 0 18px 40px rgba(2,6,23,.12);
       --radius: 16px;
       --warn:#b91c1c;
-
       --blue:#2563eb;
       --green:#16a34a;
     }
+
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(900px 520px at 15% -10%, rgba(37,99,235,.14), transparent 60%),
-        radial-gradient(800px 520px at 95% 10%, rgba(22,163,74,.12), transparent 55%),
-        var(--bg);
-      min-height:100vh;
+      background:var(--bg);
       display:flex;
-      align-items:center;
       justify-content:center;
-      padding: 22px;
+      padding:22px;
     }
-    .card{
-      width: min(980px, 100%);
-      background: var(--card);
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
-    }
-    h1{font-size: 20px; margin:0 0 10px}
-    .hint{color: var(--muted); margin:0 0 14px; font-size:14px; line-height:1.35}
 
-    .grid{display:grid; gap:12px}
-    label{font-size: 13px; color: var(--muted); display:block; margin-bottom:8px}
+    .card{
+      width:min(980px,100%);
+      background:#fff;
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    h1{margin:0 0 10px}
+    .hint{font-size:14px;color:var(--muted)}
+
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+
+    input{
+      height:44px;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      font-size:16px;
+    }
+
+    button.action{
+      height:44px;
+      padding:0 14px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .ghost{background:rgba(2,6,23,.03)}
+    .primary{
+      border:0;
+      background:linear-gradient(135deg,var(--blue),var(--green));
+      color:#fff;
+    }
 
     .inlineField{
       display:flex;
       gap:10px;
-      align-items:center;
       flex-wrap:wrap;
-    }
-    input{
-      padding: 12px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text);
-      outline: none;
-      font-size: 16px;
-      font-variant-numeric: tabular-nums;
-      height: 44px;
-      width: 240px;
-      max-width: 100%;
-    }
-
-    button.action{
-      cursor:pointer;
-      border:1px solid var(--border);
-      background: #fff;
-      color: var(--text);
-      padding: 11px 14px;
-      border-radius: 12px;
-      font-weight: 900;
-      white-space:nowrap;
-      height: 44px;
-    }
-    .ghost{background: rgba(2,6,23,.03) !important}
-    .primary{
-      border-color: transparent !important;
-      background: linear-gradient(135deg, rgba(37,99,235,.95), rgba(22,163,74,.85)) !important;
-      color:#fff !important;
+      align-items:center;
     }
 
     .toggle{
       display:inline-flex;
       border:1px solid var(--border);
-      border-radius: 12px;
+      border-radius:12px;
       overflow:hidden;
       height:44px;
-      background: rgba(2,6,23,.03);
+      background:rgba(2,6,23,.03);
     }
-    .toggle button{
-      border:0;
-      background: transparent;
-      padding: 0 14px;
-      cursor:pointer;
-      font-weight:900;
-      color: var(--muted);
-      height:44px;
-    }
-    .toggle button.active{ color:#fff }
-    #billBGNBtn.active{ background: var(--green); }
-    #billEURBtn.active{ background: var(--blue); }
 
-    /* ✅ КОРЕКЦИЯТА Е ТУК */
+    .toggle button{
+      padding:0 14px;
+      border:0;
+      background:none;
+      font-weight:900;
+      cursor:pointer;
+      color:var(--muted);
+    }
+
+    .toggle button.active{color:#fff}
+    #billEURBtn.active{background:var(--blue)}
+    #billBGNBtn.active{background:var(--green)}
+
+    /* надписът е плътно до суича */
     .billTop{
       display:flex;
       align-items:center;
-      gap:8px;      /* контролира колко е близо текста */
+      gap:8px;
       flex-wrap:wrap;
     }
+
     .billStatus{
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 900;
-      white-space: nowrap;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:900;
+      white-space:nowrap;
     }
-    /* ==================== */
+
+    .switch{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+      font-weight:900;
+      color:var(--muted);
+      margin-left:auto;
+    }
+
+    .banknotesSection[hidden]{display:none}
+
+    .banknotes{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .bn{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      cursor:pointer;
+      background:#fff;
+    }
 
     .result{
-      margin-top: 12px;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(37,99,235,.06);
-      display:grid;
-      gap:12px;
+      margin-top:12px;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(37,99,235,.06);
     }
+
     .resultGrid{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns:1fr 1fr;
       gap:12px;
     }
-    .kpi{
-      border: 1px solid rgba(15,23,42,.10);
-      background: rgba(255,255,255,.6);
-      border-radius: 12px;
-      padding: 10px 12px;
-    }
-    .kpi .small{color: var(--muted); font-size: 13px}
-    .kpi .big{font-size: 34px; font-weight: 900}
-    #eur.big{ color: var(--blue); }
-    #bgn.big{ color: var(--green); font-size: 26px; }
 
-    #info{color: var(--muted); font-size: 13px}
-    .warn{color: var(--warn)}
+    .kpi .big{font-size:32px;font-weight:900}
+    #eur{color:var(--blue)}
+    #bgn{color:var(--green);font-size:24px}
 
-    .btns{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
+    #info{font-size:13px;color:var(--muted)}
+    .warn{color:var(--warn)}
+
+    .btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
   </style>
 </head>
 
 <body>
 <main class="card">
   <h1>Ресто (EUR или BGN)</h1>
+  <p class="hint">Сметка EUR/BGN, дадени пари в лева. Курс 1.95583</p>
 
-  <div class="grid">
-    <div>
-      <label>Обща сметка на клиента</label>
-
-      <div class="billTop">
-        <div class="toggle">
-          <button id="billEURBtn" class="active" type="button">EUR</button>
-          <button id="billBGNBtn" type="button">BGN</button>
-        </div>
-        <div class="billStatus" id="billHint">Сметката е в евро (EUR).</div>
-      </div>
-
-      <div class="inlineField" style="margin-top:8px">
-        <input id="bill" placeholder="напр. 23.40">
-        <button class="action ghost" id="clearBillBtn">Изчисти</button>
-      </div>
+  <label>Обща сметка</label>
+  <div class="billTop">
+    <div class="toggle">
+      <button id="billEURBtn" class="active">EUR</button>
+      <button id="billBGNBtn">BGN</button>
     </div>
+    <div class="billStatus" id="billHint">Сметката е в евро (EUR).</div>
+  </div>
 
-    <div>
-      <label>Дадени пари (лв)</label>
-      <div class="inlineField">
-        <input id="paid" placeholder="напр. 50.00">
-        <button class="action ghost" id="clearPaidBtn">Изчисти</button>
-      </div>
-    </div>
+  <div class="inlineField" style="margin-top:8px">
+    <input id="bill" placeholder="напр. 23.40">
+    <button class="action ghost" id="clearBillBtn">Изчисти</button>
+  </div>
 
-    <div class="result">
-      <div class="resultGrid">
-        <div class="kpi">
-          <div class="small">Ресто (EUR)</div>
-          <div id="eur" class="big">0.00</div>
-        </div>
-        <div class="kpi">
-          <div class="small">Ресто (BGN)</div>
-          <div id="bgn" class="big">0.00</div>
-        </div>
-      </div>
-      <div id="info"></div>
-    </div>
+  <label style="margin-top:14px">Дадени пари (лв)</label>
+  <div class="inlineField">
+    <input id="paid" placeholder="напр. 50.00">
+    <button class="action ghost" id="clearPaidBtn">Изчисти</button>
 
-    <div class="btns">
-      <button class="action primary" id="calcBtn">Изчисли</button>
-      <button class="action" id="clearAllBtn">Изчисти всичко</button>
+    <!-- ✅ ВЪРНАТ СУИЧ -->
+    <label class="switch">
+      <input type="checkbox" id="showBanknotesSwitch">
+      Покажи банкнотите
+    </label>
+  </div>
+
+  <!-- ✅ ВЪРНАТИ БАНКНОТИ -->
+  <div class="banknotesSection" id="banknotesSection" hidden>
+    <div class="banknotes" id="banknotes">
+      <button class="bn" data-value="0.5">0.50</button>
+      <button class="bn" data-value="1">1</button>
+      <button class="bn" data-value="2">2</button>
+      <button class="bn" data-value="5">5</button>
+      <button class="bn" data-value="10">10</button>
+      <button class="bn" data-value="20">20</button>
+      <button class="bn" data-value="50">50</button>
+      <button class="bn" data-value="100">100</button>
     </div>
+  </div>
+
+  <div class="result">
+    <div class="resultGrid">
+      <div class="kpi"><div>EUR</div><div id="eur" class="big">0.00</div></div>
+      <div class="kpi"><div>BGN</div><div id="bgn" class="big">0.00</div></div>
+    </div>
+    <div id="info"></div>
+  </div>
+
+  <div class="btns">
+    <button class="action primary" id="calcBtn">Изчисли</button>
+    <button class="action" id="clearAllBtn">Изчисти всичко</button>
   </div>
 </main>
 
 <script>
   const RATE = 1.95583;
-
-  const billEl = document.getElementById('bill');
-  const paidEl = document.getElementById('paid');
-  const eurEl = document.getElementById('eur');
-  const bgnEl = document.getElementById('bgn');
-  const infoEl = document.getElementById('info');
-  const billHint = document.getElementById('billHint');
-
-  const billEURBtn = document.getElementById('billEURBtn');
-  const billBGNBtn = document.getElementById('billBGNBtn');
-
   let billCurrency = "EUR";
 
-  function parse(v){ return Number(v.replace(',','.')) }
+  const bill = document.getElementById("bill");
+  const paid = document.getElementById("paid");
+  const eur = document.getElementById("eur");
+  const bgn = document.getElementById("bgn");
+  const info = document.getElementById("info");
+  const billHint = document.getElementById("billHint");
 
-  function calc(){
-    const bill = parse(billEl.value);
-    const paid = parse(paidEl.value);
+  const showBanknotes = document.getElementById("showBanknotesSwitch");
+  const banknotesSection = document.getElementById("banknotesSection");
 
-    if(!isFinite(bill)||!isFinite(paid)){
-      eurEl.textContent=bgnEl.textContent="0.00";
-      infoEl.textContent="Въведи валидни числа.";
-      return;
-    }
-
-    const billBGN = billCurrency==="BGN" ? bill : bill*RATE;
-    const change = paid - billBGN;
-
-    if(change<0){
-      eurEl.textContent=bgnEl.textContent="0.00";
-      infoEl.textContent=`Недостиг ${Math.abs(change).toFixed(2)} лв`;
-      return;
-    }
-
-    const eur = Math.round((change/RATE)*100)/100;
-    eurEl.textContent=eur.toFixed(2);
-    bgnEl.textContent=change.toFixed(2);
-
-    infoEl.textContent=`Ресто: ${change.toFixed(2)} лв (${eur.toFixed(2)} EUR)`;
-  }
-
-  billEURBtn.onclick=()=>{
+  document.getElementById("billEURBtn").onclick = () => {
     billCurrency="EUR";
-    billEURBtn.classList.add('active');
-    billBGNBtn.classList.remove('active');
     billHint.textContent="Сметката е в евро (EUR).";
     calc();
   };
-
-  billBGNBtn.onclick=()=>{
+  document.getElementById("billBGNBtn").onclick = () => {
     billCurrency="BGN";
-    billBGNBtn.classList.add('active');
-    billEURBtn.classList.remove('active');
     billHint.textContent="Сметката е в лева (BGN).";
     calc();
   };
 
-  document.getElementById('calcBtn').onclick=calc;
-  document.getElementById('clearBillBtn').onclick=()=>billEl.value='';
-  document.getElementById('clearPaidBtn').onclick=()=>paidEl.value='';
-  document.getElementById('clearAllBtn').onclick=()=>{
-    billEl.value=paidEl.value='';
-    eurEl.textContent=bgnEl.textContent="0.00";
-    infoEl.textContent='';
+  showBanknotes.onchange = () => {
+    banknotesSection.hidden = !showBanknotes.checked;
+  };
+
+  document.getElementById("banknotes").onclick = e => {
+    if(!e.target.dataset.value) return;
+    paid.value = (Number(paid.value||0) + Number(e.target.dataset.value)).toFixed(2);
+    calc();
+  };
+
+  function calc(){
+    const b = Number(bill.value.replace(',','.'));
+    const p = Number(paid.value.replace(',','.'));
+    if(!isFinite(b)||!isFinite(p)) return;
+
+    const billBGN = billCurrency==="BGN" ? b : b*RATE;
+    const change = p - billBGN;
+
+    if(change<0){
+      eur.textContent=bgn.textContent="0.00";
+      info.textContent="Недостатъчна сума";
+      info.classList.add("warn");
+      return;
+    }
+
+    info.classList.remove("warn");
+    bgn.textContent = change.toFixed(2);
+    eur.textContent = (change/RATE).toFixed(2);
+    info.textContent = `Ресто: ${change.toFixed(2)} лв`;
+  }
+
+  document.getElementById("calcBtn").onclick=calc;
+  document.getElementById("clearAllBtn").onclick=()=>{
+    bill.value=paid.value="";
+    eur.textContent=bgn.textContent="0.00";
+    info.textContent="";
   };
 </script>
 </body>
 </html>
-
