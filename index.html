@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ресто в евро (по курс 1.95583)</title>
+  <title>Ресто (EUR + остатък или само BGN) — курс 1.95583</title>
   <style>
     :root{
       --bg:#f6f8fc;
@@ -14,7 +14,6 @@
       --shadow: 0 18px 40px rgba(2,6,23,.12);
       --radius: 16px;
       --warn:#b91c1c;
-      --brand:#2563eb;
     }
     *{box-sizing:border-box}
     body{
@@ -32,7 +31,7 @@
       padding: 22px;
     }
     .card{
-      width: min(920px, 100%);
+      width: min(980px, 100%);
       background: var(--card);
       border:1px solid var(--border);
       border-radius: var(--radius);
@@ -62,7 +61,7 @@
       font-size: 16px;
       font-variant-numeric: tabular-nums;
       height: 44px;
-      width: 260px;           /* по-късо поле */
+      width: 240px;          /* по-късо поле */
       max-width: 100%;
     }
     input:focus{
@@ -95,7 +94,7 @@
       color:#fff !important;
     }
 
-    /* Toggle BGN/EUR */
+    /* Toggle control */
     .toggle{
       display:inline-flex;
       border:1px solid var(--border);
@@ -195,7 +194,7 @@
     }
     .bn .cap span{color: var(--muted); font-weight:800}
 
-    /* Резултат: 2 колони EUR | BGN остатък */
+    /* Резултат */
     .result{
       margin-top: 10px;
       padding: 14px;
@@ -231,7 +230,7 @@
 
     .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
 
-    @media (max-width: 700px){
+    @media (max-width: 780px){
       .resultGrid{grid-template-columns: 1fr;}
     }
     @media (max-width: 560px){
@@ -246,15 +245,15 @@
 </head>
 <body>
   <main class="card">
-    <h1>Ресто в евро</h1>
+    <h1>Ресто (EUR + остатък или само BGN)</h1>
     <p class="hint">
       Избираш валута на сметката (BGN/EUR). “Дадени пари” са в <b>лева</b>.
-      Резултатът е <b>EUR (до 0.01)</b> + <b>остатък в лева</b> (ако не може да се покрие точно с евроцентове).
+      Можеш да избереш връщане на ресто <b>в EUR + остатък</b> или <b>само в BGN</b> (ако няма евро).
       Курс: <b>1.95583</b>.
     </p>
 
     <div class="grid">
-      <!-- Сметка: toggle + поле + бутон изчистване -->
+      <!-- Сметка: toggle BGN/EUR + поле + бутон изчистване -->
       <div>
         <label>Обща сметка на клиента</label>
         <div class="inlineField">
@@ -267,6 +266,18 @@
           <button class="action ghost" id="clearBillBtn" type="button">Изчисти сметката</button>
         </div>
         <div class="note" id="billHint">Сметката е в лева (BGN).</div>
+      </div>
+
+      <!-- Режим на връщане: EUR+BGN или само BGN -->
+      <div>
+        <label>Как да се върне рестото</label>
+        <div class="inlineField">
+          <div class="toggle" role="group" aria-label="Валута на рестото">
+            <button type="button" id="modeMixedBtn" class="active">EUR + BGN</button>
+            <button type="button" id="modeBgnOnlyBtn">Само BGN</button>
+          </div>
+        </div>
+        <div class="note" id="modeHint">Рестото се връща в евро (до 0.01 EUR) + остатък в лева.</div>
       </div>
 
       <!-- Дадени: поле + бутон срещу него -->
@@ -331,7 +342,7 @@
         </div>
       </div>
 
-      <!-- Резултат: EUR вляво, BGN остатък вдясно -->
+      <!-- Резултат -->
       <div class="result" aria-live="polite">
         <div class="resultGrid">
           <div class="kpi">
@@ -339,8 +350,8 @@
             <div id="eur" class="big">0.00</div>
           </div>
           <div class="kpi">
-            <div class="small">Ресто за връщане (BGN остатък)</div>
-            <div id="bgnLeft" class="big">0.00</div>
+            <div class="small">Ресто за връщане (BGN)</div>
+            <div id="bgnOut" class="big">0.00</div>
           </div>
         </div>
         <div id="info"></div>
@@ -363,7 +374,7 @@
     const paidEl = document.getElementById('paid');
 
     const eurEl = document.getElementById('eur');
-    const bgnLeftEl = document.getElementById('bgnLeft');
+    const bgnOutEl = document.getElementById('bgnOut');
     const infoEl = document.getElementById('info');
 
     const banknotesWrap = document.getElementById('banknotes');
@@ -379,8 +390,15 @@
     const billEURBtn = document.getElementById('billEURBtn');
     const billHint = document.getElementById('billHint');
 
+    const modeMixedBtn = document.getElementById('modeMixedBtn');
+    const modeBgnOnlyBtn = document.getElementById('modeBgnOnlyBtn');
+    const modeHint = document.getElementById('modeHint');
+
     // валута на сметката: "BGN" или "EUR"
     let billCurrency = "BGN";
+
+    // режим на връщане: "MIXED" (EUR + BGN) или "BGN_ONLY"
+    let changeMode = "MIXED";
 
     // натиснати стойности в стотинки: [{st, label}]
     const picked = [];
@@ -419,22 +437,12 @@
     }
 
     // Преобразуване на сметка към стотинки BGN:
-    // - ако е BGN: billSt = round(bill * 100)
-    // - ако е EUR: billSt = round( (billEUR * 1.95583) * 100 )
-    //            = round( billEUR * 195583 / 100000 * 100 )
-    //            = round( billEUR * 195583 / 1000 )
+    // - ако е BGN: round(bill * 100)
+    // - ако е EUR: round( billEUR * 195583 / 1000 )
     function billToBGNSt(billValue, currency){
       if (!Number.isFinite(billValue)) return NaN;
-
-      if (currency === "BGN") {
-        return Math.round(billValue * 100);
-      }
-
-      // EUR -> BGN стотинки, смятано чрез рационално число:
-      // billEUR * 195583/100000 = BGN
-      // *100 => стотинки
-      const st = Math.round(billValue * RATE_NUM / (RATE_DEN / 100)); // /1000
-      return st;
+      if (currency === "BGN") return Math.round(billValue * 100);
+      return Math.round(billValue * RATE_NUM / (RATE_DEN / 100)); // /1000
     }
 
     function calculate(){
@@ -445,7 +453,7 @@
 
       if (!Number.isFinite(billVal) || !Number.isFinite(paidVal)) {
         eurEl.textContent = "0.00";
-        bgnLeftEl.textContent = "0.00";
+        bgnOutEl.textContent = "0.00";
         setWarn("Въведи валидни числа (можеш и със запетая).");
         return;
       }
@@ -455,7 +463,7 @@
 
       if (!Number.isFinite(billSt)) {
         eurEl.textContent = "0.00";
-        bgnLeftEl.textContent = "0.00";
+        bgnOutEl.textContent = "0.00";
         setWarn("Грешка при смятане на сметката. Провери стойността.");
         return;
       }
@@ -464,21 +472,33 @@
 
       if (changeSt < 0) {
         eurEl.textContent = "0.00";
-        bgnLeftEl.textContent = "0.00";
+        bgnOutEl.textContent = "0.00";
         setWarn(`Недостатъчна сума: липсват ${fmt2fromSt(Math.abs(changeSt))} лв.`);
         return;
       }
 
-      // Най-големият брой евроцента E, така че покритието (в ст) <= changeSt
-      let E = Math.floor((changeSt * RATE_DEN) / RATE_NUM); // евроцентове
+      if (changeMode === "BGN_ONLY") {
+        // връщаме изцяло в лева
+        eurEl.textContent = "0.00";
+        bgnOutEl.textContent = fmt2fromSt(changeSt);
 
+        const billLabel = (billCurrency === "BGN")
+          ? `${billVal.toFixed(2)} лв`
+          : `${billVal.toFixed(2)} EUR`;
+
+        infoEl.textContent = `Сметка: ${billLabel} → ресто общо: ${fmt2fromSt(changeSt)} лв → връщане само в BGN.`;
+        return;
+      }
+
+      // MIXED: EUR + остатък BGN
+      let E = Math.floor((changeSt * RATE_DEN) / RATE_NUM); // евроцентове
       while (coveredStFromEuroCents(E) > changeSt) E--;
       while (coveredStFromEuroCents(E + 1) <= changeSt) E++;
 
       const leftSt = changeSt - coveredStFromEuroCents(E);
 
       eurEl.textContent = (E / 100).toFixed(2);
-      bgnLeftEl.textContent = fmt2fromSt(leftSt);
+      bgnOutEl.textContent = fmt2fromSt(leftSt);
 
       const billLabel = (billCurrency === "BGN")
         ? `${billVal.toFixed(2)} лв`
@@ -526,9 +546,23 @@
       billEl.focus();
     }
 
+    function setChangeMode(next){
+      changeMode = next;
+      modeMixedBtn.classList.toggle('active', next === "MIXED");
+      modeBgnOnlyBtn.classList.toggle('active', next === "BGN_ONLY");
+      modeHint.textContent =
+        next === "MIXED"
+          ? "Рестото се връща в евро (до 0.01 EUR) + остатък в лева."
+          : "Рестото се връща изцяло в лева (BGN).";
+      calculate();
+    }
+
     // Toggle events
     billBGNBtn.addEventListener('click', () => setBillCurrency("BGN"));
     billEURBtn.addEventListener('click', () => setBillCurrency("EUR"));
+
+    modeMixedBtn.addEventListener('click', () => setChangeMode("MIXED"));
+    modeBgnOnlyBtn.addEventListener('click', () => setChangeMode("BGN_ONLY"));
 
     // Banknote clicks
     banknotesWrap.addEventListener('click', (e) => {
@@ -564,7 +598,7 @@
       paidEl.value = '';
       pickedListEl.textContent = "—";
       eurEl.textContent = "0.00";
-      bgnLeftEl.textContent = "0.00";
+      bgnOutEl.textContent = "0.00";
       infoEl.textContent = '';
       clearWarn();
       billEl.focus();
