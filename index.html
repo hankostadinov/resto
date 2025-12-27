@@ -281,10 +281,10 @@
     #eur.big{ color: var(--blue); }
     #bgn.big{ color: var(--green); font-size: 26px; }
 
-    /* ✅ ЧЕРВЕН ТЕКСТ при предупреждение */
-    .warn{ color: var(--warn); font-weight: 900; }
-
+    /* базов цвят */
     #info{color: var(--muted); font-size: 13px}
+    /* ✅ когато има warning */
+    #info.warn{ color: var(--warn); }
 
     .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
 
@@ -508,7 +508,6 @@
       const paidTotal = totalPaidBGN(paidValBGN, paidValEUR);
       const changeSt = Math.round((paidTotal - billBGN) * 100);
 
-      // ✅ Недостатъчна сума -> ЧЕРВЕН текст (чрез setWarn + .warn)
       if (changeSt < 0) {
         eurEl.textContent = "0.00";
         bgnEl.textContent = "0.00";
@@ -533,7 +532,6 @@
       const paidBGNText = (Number.isFinite(paidValBGN) ? paidValBGN : 0).toFixed(2);
       const paidEURText = (Number.isFinite(paidValEUR) ? paidValEUR : 0).toFixed(2);
 
-      // евро сумата в инфото с 5 знака
       const eurInfo5 = (changeBGN / RATE).toFixed(5);
 
       infoEl.textContent =
@@ -648,3 +646,4 @@
   </script>
 </body>
 </html>
+
