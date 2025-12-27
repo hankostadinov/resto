@@ -398,7 +398,7 @@
       <div class="result" aria-live="polite">
         <div class="resultGrid">
           <div class="kpi">
-            <div class="small">Ресто за връщане (EUR)</div>
+            <div class="small">Ресто за връщане (EUR, закръглено)</div>
             <div id="eur" class="big">0.00</div>
           </div>
           <div class="kpi">
@@ -532,7 +532,7 @@
       infoEl.textContent =
         `Сметка: ${billLabel} → платено: ${paidBGNText} лв + ${paidEURText} EUR `
         + `= ${paidTotal.toFixed(2)} лв → ресто: ${changeBGN.toFixed(2)} лв `
-        + `(${eurInfo5} EUR по курс, закръглено).`;
+        + `(${eurInfo5} EUR по курс).`;
     }
 
     function addPickedSt(st, label){
