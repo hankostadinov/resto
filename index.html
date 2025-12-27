@@ -61,6 +61,11 @@
     }
     .field label{ margin:0; }
 
+    /* ✅ NEW: оцветяване на (ЛВ) и (Евро) */
+    .tagBgn{ color: var(--green); font-weight: 900; }
+    .tagEur{ color: var(--blue);  font-weight: 900; }
+    /* =================================== */
+
     input{
       padding: 12px 12px;
       border-radius: 12px;
@@ -150,12 +155,11 @@
       white-space:nowrap;
     }
 
-    /* ✅ FIX: винаги да са на един ред (и на телефон) */
     .billTop{
       display:flex;
       align-items:center;
       gap:10px;
-      flex-wrap:nowrap;            /* ключът: НЕ позволяваме да слезе на нов ред */
+      flex-wrap:nowrap;
       width:100%;
       min-width:0;
     }
@@ -164,12 +168,11 @@
       font-size: 13px;
       color: var(--muted);
       font-weight: 900;
-      white-space:nowrap;          /* да не се чупи на 2 реда */
-      overflow:hidden;             /* ако е много тясно — да не разваля layout */
-      text-overflow: ellipsis;     /* ... вместо да пада отдолу */
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
       min-width:0;
     }
-    /* ============================================ */
 
     .pickedRow{
       display:flex;
@@ -297,8 +300,6 @@
       .toggle button{flex:1}
       .billRow{width:100%}
       .field{width:100%;}
-      /* ❌ махаме старото, което сваляше текста отдолу:
-         .billStatus{width:100%}  */
     }
   </style>
 </head>
@@ -334,12 +335,12 @@
       <div>
         <div class="inlineField">
           <div class="field">
-            <label for="paid">Клиента дава (ЛВ)</label>
+            <label for="paid">Клиента дава <span class="tagBgn">(ЛВ)</span></label>
             <input id="paid" inputmode="decimal" placeholder="лв (напр. 50.00)" />
           </div>
 
           <div class="field">
-            <label for="paidEur">Клиента дава (Евро)</label>
+            <label for="paidEur">Клиента дава <span class="tagEur">(Евро)</span></label>
             <input id="paidEur" inputmode="decimal" placeholder="EUR (напр. 10.00)" />
           </div>
 
@@ -641,4 +642,5 @@
   </script>
 </body>
 </html>
+
 
