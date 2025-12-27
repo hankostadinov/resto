@@ -286,6 +286,14 @@
     /* ✅ червено САМО при недостатъчна сума */
     #info.insufficient{ color: var(--warn); }
 
+    /* ✅ NEW: долу вдясно "При въпроси..." */
+    .footerNote{
+      margin-top: 10px;
+      text-align: right;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
     .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
 
     @media (max-width: 780px){
@@ -300,6 +308,7 @@
       .toggle button{flex:1}
       .billRow{width:100%}
       .field{width:100%;}
+      .footerNote{ text-align:center; }
     }
   </style>
 </head>
@@ -410,6 +419,9 @@
         </div>
 
         <div id="info"></div>
+
+        <!-- ✅ NEW: долу вдясно -->
+        <div class="footerNote">При въпроси имейл: </div>
       </div>
 
       <div class="btns">
