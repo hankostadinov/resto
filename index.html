@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ресто – валутен калкулатор</title>
-
+  <title>Ресто (EUR или BGN) — курс 1.95583</title>
   <style>
     :root{
       --bg:#f6f8fc;
@@ -22,27 +21,35 @@
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
       background: var(--bg);
+      min-height:100vh;
       display:flex;
+      align-items:center;
       justify-content:center;
-      padding:20px;
+      padding:22px;
     }
     .card{
-      width: min(900px,100%);
+      width: min(980px, 100%);
       background: var(--card);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding:18px;
     }
-    h1{margin:0 0 12px}
+    h1{margin:0 0 10px}
+    .hint{font-size:14px;color:var(--muted)}
+
+    .grid{display:grid;gap:12px}
     label{font-size:13px;color:var(--muted);font-weight:700}
+
     input{
-      width:240px;
       padding:12px;
-      font-size:16px;
       border-radius:12px;
       border:1px solid var(--border);
+      font-size:16px;
+      width:240px;
     }
+
     button{
       padding:12px 14px;
       border-radius:12px;
@@ -51,6 +58,13 @@
       font-weight:700;
       cursor:pointer;
     }
+
+    .toggle{
+      display:inline-flex;
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+    }
     .toggle button.active{
       color:#fff;
     }
@@ -58,7 +72,6 @@
     #billBGNBtn.active{background:var(--green)}
 
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .section{margin-bottom:16px}
 
     .result{
       display:grid;
@@ -74,70 +87,67 @@
       padding:12px;
     }
     .kpi .label{font-size:13px;color:var(--muted)}
-    .kpi .value{
-      font-size:34px;
-      font-weight:900;
-    }
+    .kpi .value{font-size:34px;font-weight:900}
     #eur{color:var(--blue)}
     #bgn{color:var(--green);font-size:26px}
 
-    .info{font-size:13px;color:var(--muted);margin-top:8px}
+    .info{font-size:13px;color:var(--muted)}
     .warn{color:var(--warn)}
-
-    .switch{
-      margin-left:auto;
-      font-size:13px;
-      font-weight:700;
-    }
   </style>
 </head>
 
 <body>
 <div class="card">
   <h1>Калкулатор за ресто</h1>
+  <p class="hint">
+    Сумата в евро е ориентировъчна (закръглена до 0.01 EUR).  
+    Реалното ресто за връщане е в лева.
+  </p>
 
-  <!-- ОБЩА СМЕТКА -->
-  <div class="section">
-    <label>Обща сметка на клиента</label>
-    <div class="row">
-      <div class="toggle">
-        <button id="billEURBtn" class="active">EUR</button>
-        <button id="billBGNBtn">BGN</button>
+  <div class="grid">
+    <!-- ОБЩА СМЕТКА -->
+    <div>
+      <label>Обща сметка на клиента</label>
+      <div class="row">
+        <div class="toggle">
+          <button id="billEURBtn" class="active">EUR</button>
+          <button id="billBGNBtn">BGN</button>
+        </div>
+        <span id="billHint">Сметката е в евро (EUR)</span>
       </div>
-      <span id="billHint">Сметката е в евро (EUR)</span>
+      <div class="row">
+        <input id="bill" placeholder="напр. 23.40">
+        <button onclick="clearBill()">Изчисти</button>
+      </div>
     </div>
+
+    <!-- ДАДЕНИ ПАРИ -->
+    <div>
+      <label>Дадени пари от клиента (лв)</label>
+      <div class="row">
+        <input id="paid" placeholder="напр. 50.00">
+        <button onclick="clearPaid()">Изчисти</button>
+      </div>
+    </div>
+
+    <!-- РЕЗУЛТАТ -->
+    <div class="result">
+      <div class="kpi">
+        <div class="label">Ресто (EUR – ориентировъчно)</div>
+        <div id="eur" class="value">0.00</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Ресто за връщане (BGN)</div>
+        <div id="bgn" class="value">0.00</div>
+      </div>
+    </div>
+
+    <div id="info" class="info"></div>
+
     <div class="row">
-      <input id="bill" placeholder="напр. 12.50">
-      <button onclick="clearBill()">Изчисти</button>
+      <button onclick="calculate()">Изчисли</button>
+      <button onclick="clearAll()">Изчисти всичко</button>
     </div>
-  </div>
-
-  <!-- ДАДЕНИ ПАРИ -->
-  <div class="section">
-    <label>Дадени пари от клиента (лв)</label>
-    <div class="row">
-      <input id="paid" placeholder="напр. 50.00">
-      <button onclick="clearPaid()">Изчисти</button>
-    </div>
-  </div>
-
-  <!-- РЕЗУЛТАТ -->
-  <div class="section result">
-    <div class="kpi">
-      <div class="label">Ресто (EUR – ориентировъчно)</div>
-      <div id="eur" class="value">0.00</div>
-    </div>
-    <div class="kpi">
-      <div class="label">Ресто за връщане (BGN)</div>
-      <div id="bgn" class="value">0.00</div>
-    </div>
-  </div>
-
-  <div class="info" id="info"></div>
-
-  <div class="section row">
-    <button onclick="calculate()">Изчисли</button>
-    <button onclick="clearAll()">Изчисти всичко</button>
   </div>
 </div>
 
@@ -157,8 +167,8 @@ document.getElementById("billBGNBtn").onclick = () => setCurrency("BGN");
 
 function setCurrency(c){
   billCurrency = c;
-  document.getElementById("billEURBtn").classList.toggle("active", c==="EUR");
-  document.getElementById("billBGNBtn").classList.toggle("active", c==="BGN");
+  billEURBtn.classList.toggle("active", c==="EUR");
+  billBGNBtn.classList.toggle("active", c==="BGN");
   billHint.textContent = c==="EUR"
     ? "Сметката е в евро (EUR)"
     : "Сметката е в лева (BGN)";
@@ -171,9 +181,9 @@ function calculate(){
   if(!isFinite(billVal) || !isFinite(paidVal)) return;
 
   const billBGN = billCurrency==="EUR" ? billVal*RATE : billVal;
-  const changeBGN = paidVal - billBGN;
+  const change = paidVal - billBGN;
 
-  if(changeBGN < 0){
+  if(change < 0){
     info.textContent = "Недостатъчна сума.";
     info.classList.add("warn");
     eurEl.textContent = "0.00";
@@ -182,23 +192,19 @@ function calculate(){
   }
   info.classList.remove("warn");
 
-  const eurRounded = Math.round((changeBGN/RATE)*100)/100;
-
+  const eurRounded = Math.round((change/RATE)*100)/100;
   eurEl.textContent = eurRounded.toFixed(2);
-  bgnEl.textContent = changeBGN.toFixed(2);
-
-  info.textContent =
-    "Сумата в евро е ориентировъчна (закръглена до 0.01 EUR).";
+  bgnEl.textContent = change.toFixed(2);
 }
 
 function clearBill(){ bill.value=""; calculate(); }
 function clearPaid(){ paid.value=""; calculate(); }
 function clearAll(){
   bill.value=""; paid.value="";
-  eurEl.textContent="0.00"; bgnEl.textContent="0.00";
+  eurEl.textContent="0.00";
+  bgnEl.textContent="0.00";
   info.textContent="";
 }
 </script>
 </body>
 </html>
-
