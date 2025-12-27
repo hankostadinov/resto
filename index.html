@@ -50,9 +50,18 @@
     .inlineField{
       display:flex;
       gap:10px;
-      align-items:center;
+      align-items:flex-end;
       flex-wrap:wrap;
     }
+
+    /* NEW: поле с label над input (за микс плащане) */
+    .field{
+      display:grid;
+      gap:8px;
+      align-content:start;
+    }
+    .field label{ margin:0; } /* да не добавя двойни разстояния */
+
     input{
       padding: 12px 12px;
       border-radius: 12px;
@@ -288,6 +297,7 @@
       .billRow{width:100%}
       .billTop{width:100%}
       .billStatus{width:100%}
+      .field{width:100%;}
     }
   </style>
 </head>
@@ -322,11 +332,17 @@
 
       <!-- Дадени: BGN + EUR (микс) -->
       <div>
-        <label>Клиента дава (ЛВ)</label>
         <div class="inlineField">
-          <input id="paid" inputmode="decimal" placeholder="лв (напр. 50.00)" />
-          <label>Клиента дава (Евро)</label>
-          <input id="paidEur" inputmode="decimal" placeholder="EUR (напр. 10.00)" />
+          <div class="field">
+            <label for="paid">Клиента дава (ЛВ)</label>
+            <input id="paid" inputmode="decimal" placeholder="лв (напр. 50.00)" />
+          </div>
+
+          <div class="field">
+            <label for="paidEur">Клиента дава (Евро)</label>
+            <input id="paidEur" inputmode="decimal" placeholder="EUR (напр. 10.00)" />
+          </div>
+
           <button class="action ghost" id="clearPaidBtn" type="button">Изчисти дадено</button>
 
           <label class="switch" style="margin-left:auto;">
@@ -412,7 +428,7 @@
     const billEl = document.getElementById('bill');
 
     const paidEl = document.getElementById('paid');       // BGN
-    const paidEurEl = document.getElementById('paidEur'); // EUR (NEW)
+    const paidEurEl = document.getElementById('paidEur'); // EUR
 
     const eurEl = document.getElementById('eur');
     const bgnEl = document.getElementById('bgn');
@@ -478,7 +494,6 @@
       const paidValBGN = parseNumber(paidEl.value);
       const paidValEUR = parseNumber(paidEurEl.value);
 
-      // позволяваме единият да е празен, но не и двата невалидни
       const paidBGN_ok = Number.isFinite(paidValBGN);
       const paidEUR_ok = Number.isFinite(paidValEUR);
 
@@ -499,7 +514,6 @@
 
       const paidTotal = totalPaidBGN(paidValBGN, paidValEUR);
 
-      // в стотинки (точност)
       const changeSt = Math.round((paidTotal - billBGN) * 100);
 
       if (changeSt < 0) {
@@ -511,7 +525,6 @@
 
       const changeBGN = changeSt / 100;
 
-      // EUR: закръглено до 0.01 EUR
       const eurRounded = Math.round((changeBGN / RATE) * 100) / 100;
 
       eurEl.textContent = eurRounded.toFixed(2);
@@ -592,7 +605,6 @@
       if (Number.isFinite(st)) addPickedSt(st, label);
     });
 
-    // ако редактираш ръчно BGN или EUR — изчистваме “натиснати” банкноти (за да няма смесване)
     function clearPickedIfManualEdit(targetEl){
       if (document.activeElement === targetEl) {
         picked.length = 0;
@@ -606,7 +618,6 @@
     });
 
     paidEurEl.addEventListener('input', () => {
-      // EUR не идва от банкноти, но пак чистим picked за консистентност
       clearPickedIfManualEdit(paidEurEl);
       calculate();
     });
