@@ -13,12 +13,9 @@
       --border: rgba(15,23,42,.14);
       --shadow: 0 18px 40px rgba(2,6,23,.12);
       --radius: 16px;
-      --brand:#2563eb;
-      --brand2:#16a34a;
       --warn:#b91c1c;
     }
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -34,7 +31,7 @@
       padding: 22px;
     }
     .card{
-      width: min(680px, 100%);
+      width: min(760px, 100%);
       background: var(--card);
       border:1px solid var(--border);
       border-radius: var(--radius);
@@ -54,22 +51,53 @@
       color: var(--text);
       outline: none;
       font-size: 16px;
+      font-variant-numeric: tabular-nums;
     }
     input:focus{
       border-color: rgba(37,99,235,.55);
       box-shadow: 0 0 0 4px rgba(37,99,235,.12);
     }
     .row{display:grid; gap:8px}
+    .note{font-size: 13px; color: var(--muted); margin-top: 2px}
 
-    .note{
+    .picked{
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(2,6,23,.03);
+      padding: 10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .picked .left{
+      display:flex;
+      gap:10px;
+      align-items:baseline;
+      min-width: 220px;
+    }
+    .picked .title{
       font-size: 13px;
       color: var(--muted);
-      margin-top: 2px;
+      font-weight: 800;
+      white-space:nowrap;
+    }
+    .picked .list{
+      font-size: 14px;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      overflow-wrap:anywhere;
+    }
+    .picked .sum{
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
     }
 
     .banknotes{
       display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap:10px;
       margin-top: 8px;
     }
@@ -93,7 +121,7 @@
     .bn:active{transform: translateY(0px) scale(.99)}
     .bn img{
       width:100%;
-      height:72px;
+      height:64px;
       object-fit:cover;
       border-radius: 10px;
       border: 1px solid rgba(15,23,42,.10);
@@ -103,11 +131,11 @@
       display:flex;
       justify-content:space-between;
       align-items:center;
-      font-weight:800;
+      font-weight:900;
       font-variant-numeric: tabular-nums;
       font-size: 14px;
     }
-    .bn .cap span{color: var(--muted); font-weight:700}
+    .bn .cap span{color: var(--muted); font-weight:800}
 
     .result{
       margin-top: 10px;
@@ -128,32 +156,33 @@
     .warn{color: var(--warn)}
 
     .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
-    button{
+    button.action{
       cursor:pointer;
       border:1px solid var(--border);
       background: #fff;
       color: var(--text);
       padding: 11px 14px;
       border-radius: 12px;
-      font-weight: 800;
+      font-weight: 900;
       transition: border-color .12s ease, box-shadow .12s ease, transform .08s ease;
     }
-    button:hover{
+    button.action:hover{
       border-color: rgba(37,99,235,.35);
       box-shadow: 0 10px 25px rgba(2,6,23,.08);
       transform: translateY(-1px);
     }
-    button:active{transform: translateY(0px)}
+    button.action:active{transform: translateY(0px)}
     .primary{
-      border-color: transparent;
-      background: linear-gradient(135deg, rgba(37,99,235,.95), rgba(22,163,74,.85));
-      color:#fff;
+      border-color: transparent !important;
+      background: linear-gradient(135deg, rgba(37,99,235,.95), rgba(22,163,74,.85)) !important;
+      color:#fff !important;
     }
-    .ghost{
-      background: rgba(2,6,23,.03);
-    }
+    .ghost{background: rgba(2,6,23,.03) !important}
 
-    @media (max-width: 720px){
+    @media (max-width: 860px){
+      .banknotes{grid-template-columns: repeat(3, minmax(0, 1fr));}
+    }
+    @media (max-width: 520px){
       .banknotes{grid-template-columns: repeat(2, minmax(0, 1fr));}
     }
   </style>
@@ -174,45 +203,65 @@
       <div class="row">
         <label for="paid">Дадени пари от клиента (лв)</label>
         <input id="paid" inputmode="decimal" placeholder="напр. 50.00" />
-        <div class="note">Бързи банкноти: натисни за да добавиш към “Дадени пари”.</div>
+        <div class="note">Натискай банкноти/монети – добавят се към “Дадени пари” и се изписват отдолу.</div>
 
-        <!-- Снимкови бутони (банкноти) -->
+        <!-- Поле, което показва натиснатите банкноти -->
+        <div class="picked" aria-live="polite">
+          <div class="left">
+            <div class="title">Натиснати:</div>
+            <div class="list" id="pickedList">—</div>
+          </div>
+          <div class="sum">Сума: <span id="pickedSum">0.00</span> лв</div>
+        </div>
+
+        <!-- Снимкови бутони -->
         <div class="banknotes" id="banknotes">
-  <!-- Смени src с твоите картинки -->
-  <button class="bn" type="button" data-value="2">
-    <img src="images/2lv.jpg" alt="2 лв" />
-    <div class="cap"><strong>2</strong><span>лв</span></div>
-  </button>
+          <!-- Смени src с твоите картинки -->
+          <button class="bn" type="button" data-value="0.5" data-label="0.50">
+            <img src="images/050lv.jpg" alt="50 ст" />
+            <div class="cap"><strong>0.50</strong><span>лв</span></div>
+          </button>
 
-  <button class="bn" type="button" data-value="5">
-    <img src="images/5lv.jpg" alt="5 лв" />
-    <div class="cap"><strong>5</strong><span>лв</span></div>
-  </button>
+          <button class="bn" type="button" data-value="1" data-label="1">
+            <img src="images/1lv.jpg" alt="1 лв" />
+            <div class="cap"><strong>1</strong><span>лв</span></div>
+          </button>
 
-  <button class="bn" type="button" data-value="10">
-    <img src="images/10lv.jpg" alt="10 лв" />
-    <div class="cap"><strong>10</strong><span>лв</span></div>
-  </button>
+          <button class="bn" type="button" data-value="2" data-label="2">
+            <img src="images/2lv.jpg" alt="2 лв" />
+            <div class="cap"><strong>2</strong><span>лв</span></div>
+          </button>
 
-  <button class="bn" type="button" data-value="20">
-    <img src="images/20lv.jpg" alt="20 лв" />
-    <div class="cap"><strong>20</strong><span>лв</span></div>
-  </button>
+          <button class="bn" type="button" data-value="5" data-label="5">
+            <img src="images/5lv.jpg" alt="5 лв" />
+            <div class="cap"><strong>5</strong><span>лв</span></div>
+          </button>
 
-  <!-- НОВИ -->
-  <button class="bn" type="button" data-value="50">
-    <img src="images/50lv.jpg" alt="50 лв" />
-    <div class="cap"><strong>50</strong><span>лв</span></div>
-  </button>
+          <button class="bn" type="button" data-value="10" data-label="10">
+            <img src="images/10lv.jpg" alt="10 лв" />
+            <div class="cap"><strong>10</strong><span>лв</span></div>
+          </button>
 
-  <button class="bn" type="button" data-value="100">
-    <img src="images/100lv.jpg" alt="100 лв" />
-    <div class="cap"><strong>100</strong><span>лв</span></div>
-  </button>
-</div>
+          <button class="bn" type="button" data-value="20" data-label="20">
+            <img src="images/20lv.jpg" alt="20 лв" />
+            <div class="cap"><strong>20</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value="50" data-label="50">
+            <img src="images/50lv.jpg" alt="50 лв" />
+            <div class="cap"><strong>50</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value="100" data-label="100">
+            <img src="images/100lv.jpg" alt="100 лв" />
+            <div class="cap"><strong>100</strong><span>лв</span></div>
+          </button>
+        </div>
 
         <div class="btns" style="margin-top:10px">
-          <button class="ghost" id="clearPaidBtn" type="button">Изчисти дадено</button>
+          <button class="action ghost" id="undoBtn" type="button">← Махни последната</button>
+          <button class="action ghost" id="clearNotesBtn" type="button">Изчисти банкнотите</button>
+          <button class="action ghost" id="clearPaidBtn" type="button">Изчисти дадено</button>
         </div>
       </div>
 
@@ -223,8 +272,8 @@
       </div>
 
       <div class="btns">
-        <button class="primary" id="calcBtn" type="button">Изчисли</button>
-        <button id="clearAllBtn" type="button">Изчисти всичко</button>
+        <button class="action primary" id="calcBtn" type="button">Изчисли</button>
+        <button class="action" id="clearAllBtn" type="button">Изчисти всичко</button>
       </div>
     </div>
   </main>
@@ -237,10 +286,19 @@
     const eurEl  = document.getElementById('eur');
     const infoEl = document.getElementById('info');
 
+    const banknotesWrap = document.getElementById('banknotes');
+    const pickedListEl = document.getElementById('pickedList');
+    const pickedSumEl  = document.getElementById('pickedSum');
+
     const calcBtn = document.getElementById('calcBtn');
+    const undoBtn = document.getElementById('undoBtn');
+    const clearNotesBtn = document.getElementById('clearNotesBtn');
     const clearPaidBtn = document.getElementById('clearPaidBtn');
     const clearAllBtn = document.getElementById('clearAllBtn');
-    const banknotesWrap = document.getElementById('banknotes');
+
+    // пазим натиснатите банкноти като списък
+    // елементите са {value: number, label: string}
+    const picked = [];
 
     function parseBGNumber(value){
       if (typeof value !== 'string') return NaN;
@@ -248,17 +306,37 @@
       return v === '' ? NaN : Number(v);
     }
 
-    function fmt2(n){
-      return (Math.round(n * 100) / 100).toFixed(2);
+    function round2(n){
+      return Math.round(n * 100) / 100;
     }
 
+    function fmt2(n){
+      return round2(n).toFixed(2);
+    }
+
+    function clearWarn(){ infoEl.classList.remove('warn'); }
     function setWarn(text){
       infoEl.textContent = text;
       infoEl.classList.add('warn');
     }
 
-    function clearWarn(){
-      infoEl.classList.remove('warn');
+    function pickedSum(){
+      return round2(picked.reduce((s, x) => s + x.value, 0));
+    }
+
+    function updatePickedUI(){
+      if (picked.length === 0) {
+        pickedListEl.textContent = "—";
+      } else {
+        // показва последователно натиснатите стойности
+        pickedListEl.textContent = picked.map(x => x.label).join(", ");
+      }
+      pickedSumEl.textContent = fmt2(pickedSum());
+
+      // синхронизираме полето "Дадени пари" с натиснатата сума,
+      // освен ако потребителят ръчно е въвел друга стойност.
+      // Тук директно го приравняваме към сумата от банкнотите.
+      paidEl.value = fmt2(pickedSum());
     }
 
     function calculate(){
@@ -273,7 +351,7 @@
         return;
       }
 
-      const changeBGN = paid - bill;
+      const changeBGN = round2(paid - bill);
 
       if (changeBGN < 0) {
         eurEl.textContent = "0.00";
@@ -282,30 +360,64 @@
       }
 
       const changeEUR = changeBGN / RATE;
+
       eurEl.textContent = fmt2(changeEUR);
       infoEl.textContent = `Ресто: ${fmt2(changeBGN)} лв ÷ ${RATE} = ${fmt2(changeEUR)} EUR`;
     }
 
-    function addToPaid(value){
-      const current = parseBGNumber(paidEl.value);
-      const next = (Number.isFinite(current) ? current : 0) + value;
-      paidEl.value = fmt2(next);
+    function addPicked(value, label){
+      picked.push({ value, label });
+      updatePickedUI();
       calculate();
       paidEl.focus();
     }
 
-    // Click on banknote buttons (event delegation)
+    function undoLast(){
+      if (picked.length === 0) return;
+      picked.pop();
+      updatePickedUI();
+      calculate();
+      paidEl.focus();
+    }
+
+    function clearPicked(){
+      picked.length = 0;
+      updatePickedUI();
+      calculate();
+      paidEl.focus();
+    }
+
+    // Клик по банкнота/монета
     banknotesWrap.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-value]');
       if (!btn) return;
-      const v = Number(btn.getAttribute('data-value'));
-      if (Number.isFinite(v)) addToPaid(v);
+
+      const value = Number(btn.getAttribute('data-value'));
+      const label = btn.getAttribute('data-label') || String(value);
+
+      if (Number.isFinite(value)) addPicked(value, label);
+    });
+
+    // Ако потребителят пише ръчно в "Дадени пари",
+    // изчистваме списъка с банкноти (за да няма разминаване).
+    paidEl.addEventListener('input', () => {
+      const v = paidEl.value.trim();
+      // ако се променя ръчно, зануляваме "натиснати"
+      if (document.activeElement === paidEl) {
+        picked.length = 0;
+        pickedListEl.textContent = "—";
+        pickedSumEl.textContent = "0.00";
+      }
+      calculate();
     });
 
     calcBtn.addEventListener('click', calculate);
+    undoBtn.addEventListener('click', undoLast);
+    clearNotesBtn.addEventListener('click', clearPicked);
 
     clearPaidBtn.addEventListener('click', () => {
       paidEl.value = '';
+      clearPicked();
       calculate();
       paidEl.focus();
     });
@@ -313,14 +425,14 @@
     clearAllBtn.addEventListener('click', () => {
       billEl.value = '';
       paidEl.value = '';
+      picked.length = 0;
       eurEl.textContent = "0.00";
       infoEl.textContent = '';
       clearWarn();
+      pickedListEl.textContent = "—";
+      pickedSumEl.textContent = "0.00";
       billEl.focus();
     });
-
-    // Автоматично пресмятане при писане
-    [billEl, paidEl].forEach(el => el.addEventListener('input', calculate));
 
     // Enter да изчислява
     document.addEventListener('keydown', (e) => {
