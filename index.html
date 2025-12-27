@@ -124,10 +124,6 @@
     #billBGNBtn.active{ background: var(--green); }
     #billEURBtn.active{ background: var(--blue); }
 
-    /* Change mode toggle (blue/green too) */
-    #modeEURBtn.active{ background: var(--blue); }
-    #modeBGNBtn.active{ background: var(--green); }
-
     /* Switch (checkbox) */
     .switch{
       display:flex;
@@ -261,31 +257,6 @@
     /* BGN по-малък + зелен */
     #bgn.big{ color: var(--green); font-size: 26px; }
 
-    .resultControls{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      border-top: 1px solid rgba(15,23,42,.10);
-      padding-top: 12px;
-    }
-    .resultControls .ctlLabel{
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 900;
-      white-space:nowrap;
-    }
-
-    .billBlock{ display:grid; gap:8px; justify-items:start; }
-    .billTop{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-    .billStatus{
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 900;
-      white-space:nowrap;
-    }
-    .billRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-
     .warn{color: var(--warn)}
     #info{color: var(--muted); font-size: 13px}
 
@@ -301,11 +272,7 @@
       button.action{width:100%;}
       .toggle{width:100%;}
       .toggle button{flex:1}
-      .resultControls{gap:8px}
-      .resultControls .ctlLabel{width:100%}
-      .billRow{width:100%}
-      .billTop{width:100%}
-      .billStatus{width:100%}
+      .btns{gap:10px}
     }
   </style>
 </head>
@@ -399,7 +366,7 @@
         </div>
       </div>
 
-      <!-- РЕСТО: показваме И двата резултата, но реално използваем е само избраният режим -->
+      <!-- РЕСТО: показваме И двата резултата (EUR и BGN) -->
       <div class="result" aria-live="polite">
         <div class="resultGrid">
           <div class="kpi">
@@ -410,15 +377,6 @@
             <div class="small">Ресто за връщане (BGN)</div>
             <div id="bgn" class="big">0.00</div>
           </div>
-        </div>
-
-        <div class="resultControls">
-          <div class="ctlLabel">Как да се върне рестото:</div>
-          <div class="toggle" role="group" aria-label="Валута на рестото">
-            <button type="button" id="modeEURBtn" class="active">EUR</button>
-            <button type="button" id="modeBGNBtn">BGN</button>
-          </div>
-          <div class="note" id="modeHint" style="margin:0;">Връщане в евро (закръгляне до 0.01 EUR).</div>
         </div>
 
         <div id="info"></div>
@@ -458,13 +416,8 @@
     const billBGNBtn = document.getElementById('billBGNBtn');
     const billHint = document.getElementById('billHint');
 
-    const modeEURBtn = document.getElementById('modeEURBtn');
-    const modeBGNBtn = document.getElementById('modeBGNBtn');
-    const modeHint = document.getElementById('modeHint');
-
-    // По подразбиране: сметка в EUR (както поиска), ресто в EUR
+    // По подразбиране: сметка в EUR (както поиска)
     let billCurrency = "EUR";
-    let changeCurrency = "EUR";
 
     const picked = []; // {st, label}
 
@@ -472,10 +425,6 @@
       if (typeof value !== 'string') return NaN;
       const v = value.trim().replace(',', '.');
       return v === '' ? NaN : Number(v);
-    }
-
-    function fmt2(n){
-      return Number.isFinite(n) ? n.toFixed(2) : "0.00";
     }
 
     function clearWarn(){ infoEl.classList.remove('warn'); }
@@ -531,21 +480,18 @@
 
       const changeBGN = changeSt / 100;
 
-      // Показваме и двата варианта:
-      // - BGN: точно
-      // - EUR: закръглено до 0.01 EUR (без остатък)
+      // EUR: закръглено до 0.01 EUR (без остатък)
       const eurRounded = Math.round((changeBGN / RATE) * 100) / 100;
 
       eurEl.textContent = eurRounded.toFixed(2);
       bgnEl.textContent = changeBGN.toFixed(2);
 
-      const billLabel = billCurrency === "BGN" ? `${billVal.toFixed(2)} лв` : `${billVal.toFixed(2)} EUR`;
+      const billLabel = billCurrency === "BGN"
+        ? `${billVal.toFixed(2)} лв`
+        : `${billVal.toFixed(2)} EUR`;
 
-      if (changeCurrency === "EUR") {
-        infoEl.textContent = `Сметка: ${billLabel} → ресто: ${changeBGN.toFixed(2)} лв → връщане: ${eurRounded.toFixed(2)} EUR (закръглено).`;
-      } else {
-        infoEl.textContent = `Сметка: ${billLabel} → ресто: ${changeBGN.toFixed(2)} лв → връщане: ${changeBGN.toFixed(2)} BGN.`;
-      }
+      infoEl.textContent =
+        `Сметка: ${billLabel} → ресто: ${changeBGN.toFixed(2)} лв (${eurRounded.toFixed(2)} EUR по курс).`;
     }
 
     function addPickedSt(st, label){
@@ -586,16 +532,6 @@
       billEl.focus();
     }
 
-    function setChangeCurrency(next){
-      changeCurrency = next;
-      modeEURBtn.classList.toggle('active', next === "EUR");
-      modeBGNBtn.classList.toggle('active', next === "BGN");
-      modeHint.textContent = next === "EUR"
-        ? "Връщане в евро (закръгляне до 0.01 EUR)."
-        : "Връщане само в лева (BGN).";
-      calculate();
-    }
-
     function setBanknotesVisible(visible){
       banknotesSection.hidden = !visible;
     }
@@ -603,9 +539,6 @@
     // ---- Events ----
     billEURBtn.addEventListener('click', () => setBillCurrency("EUR"));
     billBGNBtn.addEventListener('click', () => setBillCurrency("BGN"));
-
-    modeEURBtn.addEventListener('click', () => setChangeCurrency("EUR"));
-    modeBGNBtn.addEventListener('click', () => setChangeCurrency("BGN"));
 
     setBanknotesVisible(false);
     showBanknotesSwitch.addEventListener('change', () => {
@@ -655,9 +588,6 @@
 
     // Инициализация според изискванията: EUR активен по подразбиране
     setBillCurrency("EUR");
-    setChangeCurrency("EUR");
   </script>
 </body>
 </html>
-
-
