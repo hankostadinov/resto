@@ -14,6 +14,7 @@
       --shadow: 0 18px 40px rgba(2,6,23,.12);
       --radius: 16px;
       --warn:#b91c1c;
+      --brand:#2563eb;
     }
     *{box-sizing:border-box}
     body{
@@ -116,6 +117,27 @@
       box-shadow: inset 0 0 0 1px rgba(37,99,235,.25);
     }
 
+    /* Switch (checkbox) */
+    .switch{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      user-select:none;
+    }
+    .switch input{
+      width:auto;
+      height:auto;
+      margin:0;
+      accent-color: var(--brand);
+      transform: scale(1.15);
+    }
+    .switch span{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 900;
+      white-space:nowrap;
+    }
+
     .note{font-size: 13px; color: var(--muted); margin-top: 8px}
 
     .pickedRow{
@@ -190,6 +212,11 @@
       font-size: 14px;
     }
     .bn .cap span{color: var(--muted); font-weight:800}
+
+    /* Секция банкноти (скрита по подразбиране) */
+    .banknotesSection[hidden]{
+      display:none !important;
+    }
 
     .result{
       margin-top: 12px;
@@ -287,59 +314,68 @@
         <div class="inlineField">
           <input id="paid" inputmode="decimal" placeholder="напр. 50.00" />
           <button class="action ghost" id="clearPaidBtn" type="button">Изчисти дадено</button>
+
+          <!-- SWITCH: Покажи банкнотите -->
+          <label class="switch" style="margin-left:auto;">
+            <input type="checkbox" id="showBanknotesSwitch" />
+            <span>Покажи банкнотите</span>
+          </label>
         </div>
 
-        <div class="note">Натискай банкноти/монети – добавят се към “Дадени пари” и се изписват отдолу.</div>
+        <div class="note">Ако включиш “Покажи банкнотите”, можеш да добавяш сума с бутоните.</div>
 
-        <div class="pickedRow" aria-live="polite">
-          <div class="picked">
-            <div class="title">Натиснати:</div>
-            <div class="list" id="pickedList">—</div>
+        <!-- Секцията с натиснати + банкноти е скрита по подразбиране -->
+        <div class="banknotesSection" id="banknotesSection" hidden>
+          <div class="pickedRow" aria-live="polite">
+            <div class="picked">
+              <div class="title">Натиснати:</div>
+              <div class="list" id="pickedList">—</div>
+            </div>
+            <button class="action ghost" id="undoBtn" type="button">← Махни последната</button>
           </div>
-          <button class="action ghost" id="undoBtn" type="button">← Махни последната</button>
-        </div>
 
-        <div class="banknotes" id="banknotes">
-          <!-- Смени src с твоите картинки -->
-          <button class="bn" type="button" data-value-st="50" data-label="0.50">
-            <img src="images/050lv.jpg" alt="50 ст" />
-            <div class="cap"><strong>0.50</strong><span>лв</span></div>
-          </button>
+          <div class="banknotes" id="banknotes">
+            <!-- Смени src с твоите картинки -->
+            <button class="bn" type="button" data-value-st="50" data-label="0.50">
+              <img src="images/050lv.jpg" alt="50 ст" />
+              <div class="cap"><strong>0.50</strong><span>лв</span></div>
+            </button>
 
-          <button class="bn" type="button" data-value-st="100" data-label="1">
-            <img src="images/1lv.jpg" alt="1 лв" />
-            <div class="cap"><strong>1</strong><span>лв</span></div>
-          </button>
+            <button class="bn" type="button" data-value-st="100" data-label="1">
+              <img src="images/1lv.jpg" alt="1 лв" />
+              <div class="cap"><strong>1</strong><span>лв</span></div>
+            </button>
 
-          <button class="bn" type="button" data-value-st="200" data-label="2">
-            <img src="images/2lv.jpg" alt="2 лв" />
-            <div class="cap"><strong>2</strong><span>лв</span></div>
-          </button>
+            <button class="bn" type="button" data-value-st="200" data-label="2">
+              <img src="images/2lv.jpg" alt="2 лв" />
+              <div class="cap"><strong>2</strong><span>лв</span></div>
+            </button>
 
-          <button class="bn" type="button" data-value-st="500" data-label="5">
-            <img src="images/5lv.jpg" alt="5 лв" />
-            <div class="cap"><strong>5</strong><span>лв</span></div>
-          </button>
+            <button class="bn" type="button" data-value-st="500" data-label="5">
+              <img src="images/5lv.jpg" alt="5 лв" />
+              <div class="cap"><strong>5</strong><span>лв</span></div>
+            </button>
 
-          <button class="bn" type="button" data-value-st="1000" data-label="10">
-            <img src="images/10lv.jpg" alt="10 лв" />
-            <div class="cap"><strong>10</strong><span>лв</span></div>
-          </button>
+            <button class="bn" type="button" data-value-st="1000" data-label="10">
+              <img src="images/10lv.jpg" alt="10 лв" />
+              <div class="cap"><strong>10</strong><span>лв</span></div>
+            </button>
 
-          <button class="bn" type="button" data-value-st="2000" data-label="20">
-            <img src="images/20lv.jpg" alt="20 лв" />
-            <div class="cap"><strong>20</strong><span>лв</span></div>
-          </button>
+            <button class="bn" type="button" data-value-st="2000" data-label="20">
+              <img src="images/20lv.jpg" alt="20 лв" />
+              <div class="cap"><strong>20</strong><span>лв</span></div>
+            </button>
 
-          <button class="bn" type="button" data-value-st="5000" data-label="50">
-            <img src="images/50lv.jpg" alt="50 лв" />
-            <div class="cap"><strong>50</strong><span>лв</span></div>
-          </button>
+            <button class="bn" type="button" data-value-st="5000" data-label="50">
+              <img src="images/50lv.jpg" alt="50 лв" />
+              <div class="cap"><strong>50</strong><span>лв</span></div>
+            </button>
 
-          <button class="bn" type="button" data-value-st="10000" data-label="100">
-            <img src="images/100lv.jpg" alt="100 лв" />
-            <div class="cap"><strong>100</strong><span>лв</span></div>
-          </button>
+            <button class="bn" type="button" data-value-st="10000" data-label="100">
+              <img src="images/100lv.jpg" alt="100 лв" />
+              <div class="cap"><strong>100</strong><span>лв</span></div>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -390,6 +426,9 @@
     const bgnOutEl = document.getElementById('bgnOut');
     const infoEl = document.getElementById('info');
 
+    const banknotesSection = document.getElementById('banknotesSection');
+    const showBanknotesSwitch = document.getElementById('showBanknotesSwitch');
+
     const banknotesWrap = document.getElementById('banknotes');
     const pickedListEl = document.getElementById('pickedList');
 
@@ -439,12 +478,12 @@
     }
 
     function updatePickedUIAndPaid(){
+      if (!pickedListEl) return;
       pickedListEl.textContent = picked.length ? picked.map(x => x.label).join(", ") : "—";
       paidEl.value = fmt2fromSt(pickedSumSt());
     }
 
     // Колко стотинки покриват E евроцента:
-    // bgn_st = round( (E/100) * 1.95583 * 100 ) = round( E * 1.95583 )
     function coveredStFromEuroCents(E){
       return Math.round((E * RATE_NUM) / RATE_DEN);
     }
@@ -532,7 +571,7 @@
     function clearPaid(){
       picked.length = 0;
       paidEl.value = '';
-      pickedListEl.textContent = "—";
+      if (pickedListEl) pickedListEl.textContent = "—";
       calculate();
       paidEl.focus();
     }
@@ -563,14 +602,28 @@
       calculate();
     }
 
-    // Toggle events
+    function setBanknotesVisible(visible){
+      banknotesSection.hidden = !visible;
+      // ако се скрие, не чистим сумата — просто интерфейсът се прибира
+    }
+
+    // ---- Events ----
+
+    // Toggle events (сметка валута)
     billBGNBtn.addEventListener('click', () => setBillCurrency("BGN"));
     billEURBtn.addEventListener('click', () => setBillCurrency("EUR"));
 
+    // Toggle events (режим на ресто)
     modeMixedBtn.addEventListener('click', () => setChangeMode("MIXED"));
     modeBgnOnlyBtn.addEventListener('click', () => setChangeMode("BGN_ONLY"));
 
-    // Banknote clicks
+    // Switch: show/hide banknotes section (скрито по подразбиране)
+    setBanknotesVisible(false);
+    showBanknotesSwitch.addEventListener('change', () => {
+      setBanknotesVisible(showBanknotesSwitch.checked);
+    });
+
+    // Banknote clicks (само ако секцията е налична)
     banknotesWrap.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-value-st]');
       if (!btn) return;
@@ -585,7 +638,7 @@
     paidEl.addEventListener('input', () => {
       if (document.activeElement === paidEl) {
         picked.length = 0;
-        pickedListEl.textContent = "—";
+        if (pickedListEl) pickedListEl.textContent = "—";
       }
       calculate();
     });
@@ -593,16 +646,17 @@
     // автоматично пресмятане при писане в сметката
     billEl.addEventListener('input', calculate);
 
-    calcBtn.addEventListener('click', calculate);
+    // Бутони
+    document.getElementById('calcBtn').addEventListener('click', calculate);
     undoBtn.addEventListener('click', undoLast);
     clearPaidBtn.addEventListener('click', clearPaid);
     clearBillBtn.addEventListener('click', clearBill);
 
-    clearAllBtn.addEventListener('click', () => {
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
       billEl.value = '';
       picked.length = 0;
       paidEl.value = '';
-      pickedListEl.textContent = "—";
+      if (pickedListEl) pickedListEl.textContent = "—";
       eurEl.textContent = "0.00";
       bgnOutEl.textContent = "0.00";
       infoEl.textContent = '';
