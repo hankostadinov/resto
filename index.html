@@ -44,7 +44,6 @@
     .grid{display:grid; gap:12px}
     label{font-size: 13px; color: var(--muted); display:block; margin-bottom:8px}
 
-    /* ред: по-късо поле + бутони срещу него */
     .inlineField{
       display:flex;
       gap:10px;
@@ -61,7 +60,7 @@
       font-size: 16px;
       font-variant-numeric: tabular-nums;
       height: 44px;
-      width: 240px;          /* по-късо поле */
+      width: 240px;
       max-width: 100%;
     }
     input:focus{
@@ -94,7 +93,6 @@
       color:#fff !important;
     }
 
-    /* Toggle control */
     .toggle{
       display:inline-flex;
       border:1px solid var(--border);
@@ -151,7 +149,6 @@
       overflow-wrap:anywhere;
     }
 
-    /* Банкноти: 2 реда по 4 */
     .banknotes{
       display:grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -194,15 +191,14 @@
     }
     .bn .cap span{color: var(--muted); font-weight:800}
 
-    /* Резултат */
     .result{
-      margin-top: 10px;
+      margin-top: 12px;
       padding: 14px;
       border-radius: 14px;
       border: 1px solid var(--border);
       background: rgba(37,99,235,.06);
       display:grid;
-      gap:10px;
+      gap:12px;
     }
     .resultGrid{
       display:grid;
@@ -225,6 +221,22 @@
       line-height: 1.1;
       font-variant-numeric: tabular-nums;
     }
+
+    .resultControls{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      border-top: 1px solid rgba(15,23,42,.10);
+      padding-top: 12px;
+    }
+    .resultControls .ctlLabel{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 900;
+      white-space:nowrap;
+    }
+
     .warn{color: var(--warn)}
     #info{color: var(--muted); font-size: 13px}
 
@@ -240,6 +252,8 @@
       button.action{width:100%;}
       .toggle{width:100%;}
       .toggle button{flex:1}
+      .resultControls{gap:8px}
+      .resultControls .ctlLabel{width:100%}
     }
   </style>
 </head>
@@ -248,8 +262,7 @@
     <h1>Ресто (EUR + остатък или само BGN)</h1>
     <p class="hint">
       Избираш валута на сметката (BGN/EUR). “Дадени пари” са в <b>лева</b>.
-      Можеш да избереш връщане на ресто <b>в EUR + остатък</b> или <b>само в BGN</b> (ако няма евро).
-      Курс: <b>1.95583</b>.
+      Рестото може да се върне <b>в EUR + BGN</b> или <b>само в BGN</b>. Курс: <b>1.95583</b>.
     </p>
 
     <div class="grid">
@@ -266,18 +279,6 @@
           <button class="action ghost" id="clearBillBtn" type="button">Изчисти сметката</button>
         </div>
         <div class="note" id="billHint">Сметката е в лева (BGN).</div>
-      </div>
-
-      <!-- Режим на връщане: EUR+BGN или само BGN -->
-      <div>
-        <label>Как да се върне рестото</label>
-        <div class="inlineField">
-          <div class="toggle" role="group" aria-label="Валута на рестото">
-            <button type="button" id="modeMixedBtn" class="active">EUR + BGN</button>
-            <button type="button" id="modeBgnOnlyBtn">Само BGN</button>
-          </div>
-        </div>
-        <div class="note" id="modeHint">Рестото се връща в евро (до 0.01 EUR) + остатък в лева.</div>
       </div>
 
       <!-- Дадени: поле + бутон срещу него -->
@@ -342,7 +343,7 @@
         </div>
       </div>
 
-      <!-- Резултат -->
+      <!-- РЕСТО: резултати + toggle как да се върне -->
       <div class="result" aria-live="polite">
         <div class="resultGrid">
           <div class="kpi">
@@ -354,6 +355,18 @@
             <div id="bgnOut" class="big">0.00</div>
           </div>
         </div>
+
+        <div class="resultControls">
+          <div class="ctlLabel">Как да се върне рестото:</div>
+          <div class="toggle" role="group" aria-label="Валута на рестото">
+            <button type="button" id="modeMixedBtn" class="active">EUR + BGN</button>
+            <button type="button" id="modeBgnOnlyBtn">Само BGN</button>
+          </div>
+          <div class="note" id="modeHint" style="margin:0;">
+            Рестото се връща в евро (до 0.01 EUR) + остатък в лева.
+          </div>
+        </div>
+
         <div id="info"></div>
       </div>
 
@@ -436,7 +449,6 @@
       return Math.round((E * RATE_NUM) / RATE_DEN);
     }
 
-    // Преобразуване на сметка към стотинки BGN:
     // - ако е BGN: round(bill * 100)
     // - ако е EUR: round( billEUR * 195583 / 1000 )
     function billToBGNSt(billValue, currency){
@@ -477,15 +489,13 @@
         return;
       }
 
+      const billLabel = (billCurrency === "BGN")
+        ? `${billVal.toFixed(2)} лв`
+        : `${billVal.toFixed(2)} EUR`;
+
       if (changeMode === "BGN_ONLY") {
-        // връщаме изцяло в лева
         eurEl.textContent = "0.00";
         bgnOutEl.textContent = fmt2fromSt(changeSt);
-
-        const billLabel = (billCurrency === "BGN")
-          ? `${billVal.toFixed(2)} лв`
-          : `${billVal.toFixed(2)} EUR`;
-
         infoEl.textContent = `Сметка: ${billLabel} → ресто общо: ${fmt2fromSt(changeSt)} лв → връщане само в BGN.`;
         return;
       }
@@ -499,10 +509,6 @@
 
       eurEl.textContent = (E / 100).toFixed(2);
       bgnOutEl.textContent = fmt2fromSt(leftSt);
-
-      const billLabel = (billCurrency === "BGN")
-        ? `${billVal.toFixed(2)} лв`
-        : `${billVal.toFixed(2)} EUR`;
 
       infoEl.textContent =
         `Сметка: ${billLabel} → ресто общо: ${fmt2fromSt(changeSt)} лв → ${(E/100).toFixed(2)} EUR + ${fmt2fromSt(leftSt)} лв`;
