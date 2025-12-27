@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ресто в евро (по курс 1.95583)</title>
+  <style>
+    :root{
+      --bg:#0b0f17; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
+      --border: rgba(148,163,184,.2); --shadow: 0 14px 34px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(800px 500px at 20% -10%, rgba(96,165,250,.22), transparent 60%),
+                  radial-gradient(700px 500px at 90% 10%, rgba(34,197,94,.16), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px;
+    }
+    .card{
+      width: min(560px, 100%);
+      background: rgba(17,24,39,.62);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      padding: 18px;
+    }
+    h1{font-size: 20px; margin:0 0 10px}
+    .hint{color: var(--muted); margin:0 0 14px; font-size:14px}
+    .grid{display:grid; gap:12px}
+    label{font-size: 13px; color: var(--muted)}
+    input{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(11,15,23,.55);
+      color: var(--text);
+      outline: none;
+      font-size: 16px;
+    }
+    input:focus{border-color: rgba(96,165,250,.55)}
+    .row{display:grid; gap:8px}
+    .result{
+      margin-top: 10px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(11,15,23,.45);
+    }
+    .big{
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+      margin: 2px 0 4px;
+      line-height: 1.1;
+    }
+    .small{color: var(--muted); font-size: 13px}
+    .warn{color:#fca5a5}
+    .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    button{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background: rgba(17,24,39,.45);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+    button:hover{border-color: rgba(96,165,250,.55)}
+    .primary{
+      border-color: transparent;
+      background: linear-gradient(135deg, rgba(96,165,250,.95), rgba(34,197,94,.75));
+      color:#07111f;
+    }
+    .mono{font-variant-numeric: tabular-nums}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Ресто в евро</h1>
+    <p class="hint">
+      Въвеждаш сметката (лв) и даденото (лв). Получаваш ресто в <b>EUR</b> по курс <b class="mono">1.95583</b>.
+    </p>
+
+    <div class="grid">
+      <div class="row">
+        <label for="bill">Обща сметка на клиента (лв)</label>
+        <input id="bill" inputmode="decimal" placeholder="напр. 23.40" />
+      </div>
+
+      <div class="row">
+        <label for="paid">Дадени пари от клиента (лв)</label>
+        <input id="paid" inputmode="decimal" placeholder="напр. 50.00" />
+      </div>
+
+      <div class="result" aria-live="polite">
+        <div class="small">Ресто за връщане (EUR)</div>
+        <div id="eur" class="big mono">0.00</div>
+        <div id="info" class="small"></div>
+      </div>
+
+      <div class="btns">
+        <button class="primary" id="calcBtn" type="button">Изчисли</button>
+        <button id="clearBtn" type="button">Изчисти</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const RATE = 1.95583; // BGN per 1 EUR
+
+    const billEl = document.getElementById('bill');
+    const paidEl = document.getElementById('paid');
+    const eurEl  = document.getElementById('eur');
+    const infoEl = document.getElementById('info');
+    const calcBtn = document.getElementById('calcBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    function parseBGNumber(value){
+      // позволява и запетая
+      if (typeof value !== 'string') return NaN;
+      const v = value.trim().replace(',', '.');
+      return v === '' ? NaN : Number(v);
+    }
+
+    function fmt2(n){
+      // 2 знака след десетичната
+      return (Math.round(n * 100) / 100).toFixed(2);
+    }
+
+    function calculate(){
+      const bill = parseBGNumber(billEl.value);
+      const paid = parseBGNumber(paidEl.value);
+
+      infoEl.classList.remove('warn');
+
+      if (!Number.isFinite(bill) || !Number.isFinite(paid)) {
+        eurEl.textContent = "0.00";
+        infoEl.textContent = "Въведи валидни числа (можеш и със запетая).";
+        infoEl.classList.add('warn');
+        return;
+      }
+
+      const changeBGN = paid - bill;
+
+      if (changeBGN < 0) {
+        eurEl.textContent = "0.00";
+        infoEl.textContent = `Недостатъчна сума: липсват ${fmt2(Math.abs(changeBGN))} лв.`;
+        infoEl.classList.add('warn');
+        return;
+      }
+
+      const changeEUR = changeBGN / RATE;
+
+      eurEl.textContent = fmt2(changeEUR);
+      infoEl.textContent = `Ресто: ${fmt2(changeBGN)} лв ÷ ${RATE} = ${fmt2(changeEUR)} EUR`;
+    }
+
+    function clearAll(){
+      billEl.value = '';
+      paidEl.value = '';
+      eurEl.textContent = "0.00";
+      infoEl.textContent = '';
+      billEl.focus();
+    }
+
+    calcBtn.addEventListener('click', calculate);
+    clearBtn.addEventListener('click', clearAll);
+
+    // Автоматично пресмятане при писане
+    [billEl, paidEl].forEach(el => el.addEventListener('input', calculate));
+
+    // Enter да изчислява
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') calculate();
+    });
+  </script>
+</body>
+</html>
