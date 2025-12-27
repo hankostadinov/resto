@@ -31,7 +31,7 @@
       padding: 22px;
     }
     .card{
-      width: min(820px, 100%);
+      width: min(860px, 100%);
       background: var(--card);
       border:1px solid var(--border);
       border-radius: var(--radius);
@@ -40,11 +40,18 @@
     }
     h1{font-size: 20px; margin:0 0 10px}
     .hint{color: var(--muted); margin:0 0 14px; font-size:14px; line-height:1.35}
-    .grid{display:grid; gap:12px}
 
-    label{font-size: 13px; color: var(--muted)}
+    .grid{display:grid; gap:12px}
+    label{font-size: 13px; color: var(--muted); display:block; margin-bottom:8px}
+
+    /* ред: по-късо поле + бутон срещу него */
+    .inlineField{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
     input{
-      width:100%;
       padding: 12px 12px;
       border-radius: 12px;
       border: 1px solid var(--border);
@@ -53,19 +60,13 @@
       outline: none;
       font-size: 16px;
       font-variant-numeric: tabular-nums;
+      height: 44px;
+      width: 260px;           /* по-късо поле */
+      max-width: 100%;
     }
     input:focus{
       border-color: rgba(37,99,235,.55);
       box-shadow: 0 0 0 4px rgba(37,99,235,.12);
-    }
-    .note{font-size: 13px; color: var(--muted); margin-top: 2px}
-
-    /* Ред: поле + бутон срещу него */
-    .fieldRow{
-      display:grid;
-      grid-template-columns: 1fr auto;
-      gap:10px;
-      align-items:end;
     }
 
     button.action{
@@ -78,7 +79,7 @@
       font-weight: 900;
       transition: border-color .12s ease, box-shadow .12s ease, transform .08s ease;
       white-space:nowrap;
-      height: 44px; /* да се подравнява с input */
+      height: 44px;
     }
     button.action:hover{
       border-color: rgba(37,99,235,.35);
@@ -93,11 +94,13 @@
       color:#fff !important;
     }
 
+    .note{font-size: 13px; color: var(--muted); margin-top: 8px}
+
     .pickedRow{
       display:flex;
       align-items:stretch;
       gap:10px;
-      margin-top: 8px;
+      margin-top: 10px;
       flex-wrap:wrap;
     }
     .picked{
@@ -208,9 +211,9 @@
     }
     @media (max-width: 560px){
       .banknotes{grid-template-columns: repeat(2, minmax(0, 1fr));}
-      .picked{flex-basis: 100%;}
-      .fieldRow{grid-template-columns: 1fr;}
-      button.action{width:100%}
+      input{width:100%;}
+      .inlineField{width:100%;}
+      button.action{width:100%;}
     }
   </style>
 </head>
@@ -223,75 +226,75 @@
     </p>
 
     <div class="grid">
-      <!-- Обща сметка + бутон срещу нея -->
-      <div class="fieldRow">
-        <div class="row">
-          <label for="bill">Обща сметка на клиента (лв)</label>
+      <!-- Сметка: по-късо поле + бутон срещу него -->
+      <div>
+        <label for="bill">Обща сметка на клиента (лв)</label>
+        <div class="inlineField">
           <input id="bill" inputmode="decimal" placeholder="напр. 23.40" />
+          <button class="action ghost" id="clearBillBtn" type="button">Изчисти сметката</button>
         </div>
-        <button class="action ghost" id="clearBillBtn" type="button">Изчисти сметката</button>
       </div>
 
-      <!-- Дадени пари + бутон срещу него -->
-      <div class="fieldRow">
-        <div class="row">
-          <label for="paid">Дадени пари от клиента (лв)</label>
+      <!-- Дадени: по-късо поле + бутон срещу него (както искаш) -->
+      <div>
+        <label for="paid">Дадени пари от клиента (лв)</label>
+        <div class="inlineField">
           <input id="paid" inputmode="decimal" placeholder="напр. 50.00" />
-          <div class="note">Натискай банкноти/монети – добавят се към “Дадени пари” и се изписват отдолу.</div>
-
-          <div class="pickedRow" aria-live="polite">
-            <div class="picked">
-              <div class="title">Натиснати:</div>
-              <div class="list" id="pickedList">—</div>
-            </div>
-            <button class="action ghost" id="undoBtn" type="button">← Махни последната</button>
-          </div>
-
-          <div class="banknotes" id="banknotes">
-            <!-- Смени src с твоите картинки -->
-            <button class="bn" type="button" data-value-st="50" data-label="0.50">
-              <img src="images/050lv.jpg" alt="50 ст" />
-              <div class="cap"><strong>0.50</strong><span>лв</span></div>
-            </button>
-
-            <button class="bn" type="button" data-value-st="100" data-label="1">
-              <img src="images/1lv.jpg" alt="1 лв" />
-              <div class="cap"><strong>1</strong><span>лв</span></div>
-            </button>
-
-            <button class="bn" type="button" data-value-st="200" data-label="2">
-              <img src="images/2lv.jpg" alt="2 лв" />
-              <div class="cap"><strong>2</strong><span>лв</span></div>
-            </button>
-
-            <button class="bn" type="button" data-value-st="500" data-label="5">
-              <img src="images/5lv.jpg" alt="5 лв" />
-              <div class="cap"><strong>5</strong><span>лв</span></div>
-            </button>
-
-            <button class="bn" type="button" data-value-st="1000" data-label="10">
-              <img src="images/10lv.jpg" alt="10 лв" />
-              <div class="cap"><strong>10</strong><span>лв</span></div>
-            </button>
-
-            <button class="bn" type="button" data-value-st="2000" data-label="20">
-              <img src="images/20lv.jpg" alt="20 лв" />
-              <div class="cap"><strong>20</strong><span>лв</span></div>
-            </button>
-
-            <button class="bn" type="button" data-value-st="5000" data-label="50">
-              <img src="images/50lv.jpg" alt="50 лв" />
-              <div class="cap"><strong>50</strong><span>лв</span></div>
-            </button>
-
-            <button class="bn" type="button" data-value-st="10000" data-label="100">
-              <img src="images/100lv.jpg" alt="100 лв" />
-              <div class="cap"><strong>100</strong><span>лв</span></div>
-            </button>
-          </div>
+          <button class="action ghost" id="clearPaidBtn" type="button">Изчисти дадено</button>
         </div>
 
-        <button class="action ghost" id="clearPaidBtn" type="button">Изчисти дадено</button>
+        <div class="note">Натискай банкноти/монети – добавят се към “Дадени пари” и се изписват отдолу.</div>
+
+        <div class="pickedRow" aria-live="polite">
+          <div class="picked">
+            <div class="title">Натиснати:</div>
+            <div class="list" id="pickedList">—</div>
+          </div>
+          <button class="action ghost" id="undoBtn" type="button">← Махни последната</button>
+        </div>
+
+        <div class="banknotes" id="banknotes">
+          <!-- Смени src с твоите картинки -->
+          <button class="bn" type="button" data-value-st="50" data-label="0.50">
+            <img src="images/050lv.jpg" alt="50 ст" />
+            <div class="cap"><strong>0.50</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value-st="100" data-label="1">
+            <img src="images/1lv.jpg" alt="1 лв" />
+            <div class="cap"><strong>1</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value-st="200" data-label="2">
+            <img src="images/2lv.jpg" alt="2 лв" />
+            <div class="cap"><strong>2</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value-st="500" data-label="5">
+            <img src="images/5lv.jpg" alt="5 лв" />
+            <div class="cap"><strong>5</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value-st="1000" data-label="10">
+            <img src="images/10lv.jpg" alt="10 лв" />
+            <div class="cap"><strong>10</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value-st="2000" data-label="20">
+            <img src="images/20lv.jpg" alt="20 лв" />
+            <div class="cap"><strong>20</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value-st="5000" data-label="50">
+            <img src="images/50lv.jpg" alt="50 лв" />
+            <div class="cap"><strong>50</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value-st="10000" data-label="100">
+            <img src="images/100lv.jpg" alt="100 лв" />
+            <div class="cap"><strong>100</strong><span>лв</span></div>
+          </button>
+        </div>
       </div>
 
       <!-- Резултат: EUR вляво, BGN остатък вдясно -->
