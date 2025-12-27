@@ -61,10 +61,8 @@
     }
     .field label{ margin:0; }
 
-    /* ✅ NEW: оцветяване на (ЛВ) и (Евро) */
     .tagBgn{ color: var(--green); font-weight: 900; }
     .tagEur{ color: var(--blue);  font-weight: 900; }
-    /* =================================== */
 
     input{
       padding: 12px 12px;
@@ -313,8 +311,6 @@
     <div class="grid">
       <!-- Сметка -->
       <div>
-        
-
         <div class="billBlock">
           <div class="billTop">
             <div class="toggle" role="group" aria-label="Валута на сметката">
@@ -530,10 +526,13 @@
       const paidBGNText = (Number.isFinite(paidValBGN) ? paidValBGN : 0).toFixed(2);
       const paidEURText = (Number.isFinite(paidValEUR) ? paidValEUR : 0).toFixed(2);
 
+      /* ✅ NEW: евро сумата в инфото да е с 5 знака */
+      const eurInfo5 = (changeBGN / RATE).toFixed(5);
+
       infoEl.textContent =
         `Сметка: ${billLabel} → платено: ${paidBGNText} лв + ${paidEURText} EUR `
         + `= ${paidTotal.toFixed(2)} лв → ресто: ${changeBGN.toFixed(2)} лв `
-        + `(${eurRounded.toFixed(2)} EUR по курс, закръглено).`;
+        + `(${eurInfo5} EUR по курс, закръглено).`;
     }
 
     function addPickedSt(st, label){
