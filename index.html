@@ -37,7 +37,7 @@
       width: min(980px, 100%);
       background: var(--card);
       border:1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 16px;
       box-shadow: var(--shadow);
       padding: 18px;
     }
@@ -172,79 +172,6 @@
       min-width:0;
     }
 
-    .pickedRow{
-      display:flex;
-      align-items:stretch;
-      gap:10px;
-      margin-top: 10px;
-      flex-wrap:wrap;
-    }
-    .picked{
-      flex: 1 1 420px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: rgba(2,6,23,.03);
-      padding: 10px 12px;
-      display:flex;
-      gap:10px;
-      align-items:baseline;
-      min-height:44px;
-    }
-    .picked .title{
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 800;
-      white-space:nowrap;
-    }
-    .picked .list{
-      font-size: 14px;
-      color: var(--text);
-      font-variant-numeric: tabular-nums;
-      overflow-wrap:anywhere;
-    }
-
-    .banknotes{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap:10px;
-      margin-top: 10px;
-    }
-    .bn{
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: #fff;
-      padding: 10px;
-      cursor: pointer;
-      display:grid;
-      gap:8px;
-      align-content:start;
-      transition: transform .08s ease, border-color .12s ease, box-shadow .12s ease;
-      user-select:none;
-    }
-    .bn:hover{
-      border-color: rgba(37,99,235,.35);
-      box-shadow: 0 10px 25px rgba(2,6,23,.08);
-      transform: translateY(-1px);
-    }
-    .bn:active{transform: translateY(0px) scale(.99)}
-    .bn img{
-      width:100%;
-      height:64px;
-      object-fit:cover;
-      border-radius: 10px;
-      border: 1px solid rgba(15,23,42,.10);
-      background: linear-gradient(135deg, rgba(37,99,235,.10), rgba(22,163,74,.08));
-    }
-    .bn .cap{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      font-weight:900;
-      font-variant-numeric: tabular-nums;
-      font-size: 14px;
-    }
-    .bn .cap span{color: var(--muted); font-weight:800}
-
     .banknotesSection[hidden]{ display:none !important; }
 
     .result{
@@ -281,10 +208,11 @@
     #eur.big{ color: var(--blue); }
     #bgn.big{ color: var(--green); font-size: 26px; }
 
-    /* базов цвят */
+    /* базов текст за инфо */
     #info{color: var(--muted); font-size: 13px}
-    /* ✅ когато има warning */
-    #info.warn{ color: var(--warn); }
+
+    /* ✅ червено САМО при недостатъчна сума */
+    #info.insufficient{ color: var(--warn); }
 
     .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
 
@@ -292,7 +220,6 @@
       .resultGrid{grid-template-columns: 1fr;}
     }
     @media (max-width: 560px){
-      .banknotes{grid-template-columns: repeat(2, minmax(0, 1fr));}
       input{width:100%;}
       .inlineField{width:100%;}
       button.action{width:100%;}
@@ -306,12 +233,9 @@
 <body>
   <main class="card">
     <h1>Ресто (EUR или BGN)</h1>
-    <p class="hint">
-      Курс: <b>1.95583</b>.
-    </p>
+    <p class="hint">Курс: <b>1.95583</b>.</p>
 
     <div class="grid">
-      <!-- Сметка -->
       <div>
         <div class="billBlock">
           <div class="billTop">
@@ -329,7 +253,6 @@
         </div>
       </div>
 
-      <!-- Дадени: BGN + EUR (микс) -->
       <div>
         <div class="inlineField">
           <div class="field">
@@ -396,7 +319,6 @@
         </div>
       </div>
 
-      <!-- РЕСТО -->
       <div class="result" aria-live="polite">
         <div class="resultGrid">
           <div class="kpi">
@@ -454,10 +376,18 @@
       return v === '' ? NaN : Number(v);
     }
 
-    function clearWarn(){ infoEl.classList.remove('warn'); }
-    function setWarn(text){
+    function clearInfoState(){
+      infoEl.classList.remove('insufficient');
+    }
+
+    function setInfo(text){
       infoEl.textContent = text;
-      infoEl.classList.add('warn');
+      clearInfoState();
+    }
+
+    function setInsufficient(text){
+      infoEl.textContent = text;
+      infoEl.classList.add('insufficient');
     }
 
     function pickedSumSt(){
@@ -481,7 +411,7 @@
     }
 
     function calculate(){
-      clearWarn();
+      clearInfoState();
 
       const billVal = parseNumber(billEl.value);
       const paidValBGN = parseNumber(paidEl.value);
@@ -493,7 +423,7 @@
       if (!Number.isFinite(billVal) || (!paidBGN_ok && !paidEUR_ok)) {
         eurEl.textContent = "0.00";
         bgnEl.textContent = "0.00";
-        setWarn("Въведи валидни числа (можеш и със запетая).");
+        setInfo("Въведи валидни числа (можеш и със запетая).");
         return;
       }
 
@@ -501,7 +431,7 @@
       if (!Number.isFinite(billBGN)) {
         eurEl.textContent = "0.00";
         bgnEl.textContent = "0.00";
-        setWarn("Грешка при смятане на сметката. Провери стойността.");
+        setInfo("Грешка при смятане на сметката. Провери стойността.");
         return;
       }
 
@@ -515,7 +445,7 @@
         const missingBGN = Math.abs(changeSt) / 100;
         const missingEUR = (missingBGN / RATE).toFixed(2);
 
-        setWarn(`Недостатъчна сума: липсват ${missingBGN.toFixed(2)} лв (или ${missingEUR} EUR).`);
+        setInsufficient(`Недостатъчна сума: липсват ${missingBGN.toFixed(2)} лв (или ${missingEUR} EUR).`);
         return;
       }
 
@@ -634,7 +564,7 @@
       eurEl.textContent = "0.00";
       bgnEl.textContent = "0.00";
       infoEl.textContent = '';
-      clearWarn();
+      clearInfoState();
       billEl.focus();
     });
 
