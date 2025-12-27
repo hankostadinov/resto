@@ -283,8 +283,8 @@
 
     /* базов цвят */
     #info{color: var(--muted); font-size: 13px}
-    /* ✅ когато има warning */
-    #info.warn{ color: var(--warn); }
+    /* ✅ червено САМО при недостатъчна сума */
+    #info.insufficient{ color: var(--warn); }
 
     .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
 
@@ -454,10 +454,19 @@
       return v === '' ? NaN : Number(v);
     }
 
-    function clearWarn(){ infoEl.classList.remove('warn'); }
-    function setWarn(text){
+    // ✅ reset: маха само "insufficient"
+    function clearWarn(){ infoEl.classList.remove('insufficient'); }
+
+    // ✅ нормално инфо (сиво)
+    function setInfo(text){
       infoEl.textContent = text;
-      infoEl.classList.add('warn');
+      clearWarn();
+    }
+
+    // ✅ недостатъчна сума (червено)
+    function setInsufficient(text){
+      infoEl.textContent = text;
+      infoEl.classList.add('insufficient');
     }
 
     function pickedSumSt(){
@@ -493,7 +502,7 @@
       if (!Number.isFinite(billVal) || (!paidBGN_ok && !paidEUR_ok)) {
         eurEl.textContent = "0.00";
         bgnEl.textContent = "0.00";
-        setWarn("Въведи валидни числа (можеш и със запетая).");
+        setInfo("Въведи валидни числа (можеш и със запетая).");
         return;
       }
 
@@ -501,7 +510,7 @@
       if (!Number.isFinite(billBGN)) {
         eurEl.textContent = "0.00";
         bgnEl.textContent = "0.00";
-        setWarn("Грешка при смятане на сметката. Провери стойността.");
+        setInfo("Грешка при смятане на сметката. Провери стойността.");
         return;
       }
 
@@ -515,7 +524,7 @@
         const missingBGN = Math.abs(changeSt) / 100;
         const missingEUR = (missingBGN / RATE).toFixed(2);
 
-        setWarn(`Недостатъчна сума: липсват ${missingBGN.toFixed(2)} лв (или ${missingEUR} EUR).`);
+        setInsufficient(`Недостатъчна сума: липсват ${missingBGN.toFixed(2)} лв (или ${missingEUR} EUR).`);
         return;
       }
 
@@ -646,4 +655,3 @@
   </script>
 </body>
 </html>
-
