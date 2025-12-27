@@ -281,7 +281,9 @@
     #eur.big{ color: var(--blue); }
     #bgn.big{ color: var(--green); font-size: 26px; }
 
-    .warn{color: var(--warn)}
+    /* ✅ ЧЕРВЕН ТЕКСТ при предупреждение */
+    .warn{ color: var(--warn); font-weight: 900; }
+
     #info{color: var(--muted); font-size: 13px}
 
     .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
@@ -506,17 +508,17 @@
       const paidTotal = totalPaidBGN(paidValBGN, paidValEUR);
       const changeSt = Math.round((paidTotal - billBGN) * 100);
 
+      // ✅ Недостатъчна сума -> ЧЕРВЕН текст (чрез setWarn + .warn)
       if (changeSt < 0) {
-  eurEl.textContent = "0.00";
-  bgnEl.textContent = "0.00";
+        eurEl.textContent = "0.00";
+        bgnEl.textContent = "0.00";
 
-  const missingBGN = Math.abs(changeSt) / 100;
-  const missingEUR = (missingBGN / RATE).toFixed(2);
+        const missingBGN = Math.abs(changeSt) / 100;
+        const missingEUR = (missingBGN / RATE).toFixed(2);
 
-  setWarn(`Недостатъчна сума: липсват ${missingBGN.toFixed(2)} лв (или ${missingEUR} EUR).`);
-  return;
-}
-
+        setWarn(`Недостатъчна сума: липсват ${missingBGN.toFixed(2)} лв (или ${missingEUR} EUR).`);
+        return;
+      }
 
       const changeBGN = changeSt / 100;
       const eurRounded = Math.round((changeBGN / RATE) * 100) / 100;
@@ -531,7 +533,7 @@
       const paidBGNText = (Number.isFinite(paidValBGN) ? paidValBGN : 0).toFixed(2);
       const paidEURText = (Number.isFinite(paidValEUR) ? paidValEUR : 0).toFixed(2);
 
-      /* ✅ NEW: евро сумата в инфото да е с 5 знака */
+      // евро сумата в инфото с 5 знака
       const eurInfo5 = (changeBGN / RATE).toFixed(5);
 
       infoEl.textContent =
