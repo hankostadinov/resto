@@ -6,17 +6,27 @@
   <title>Ресто в евро (по курс 1.95583)</title>
   <style>
     :root{
-      --bg:#0b0f17; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
-      --border: rgba(148,163,184,.2); --shadow: 0 14px 34px rgba(0,0,0,.35);
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --border: rgba(15,23,42,.14);
+      --shadow: 0 18px 40px rgba(2,6,23,.12);
       --radius: 16px;
+      --brand:#2563eb;
+      --brand2:#16a34a;
+      --warn:#b91c1c;
     }
     *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     body{
-      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(800px 500px at 20% -10%, rgba(96,165,250,.22), transparent 60%),
-                  radial-gradient(700px 500px at 90% 10%, rgba(34,197,94,.16), transparent 55%),
-                  var(--bg);
-      color: var(--text);
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 520px at 15% -10%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(800px 520px at 95% 10%, rgba(22,163,74,.12), transparent 55%),
+        var(--bg);
       min-height:100vh;
       display:flex;
       align-items:center;
@@ -24,12 +34,11 @@
       padding: 22px;
     }
     .card{
-      width: min(560px, 100%);
-      background: rgba(17,24,39,.62);
+      width: min(680px, 100%);
+      background: var(--card);
       border:1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
       padding: 18px;
     }
     h1{font-size: 20px; margin:0 0 10px}
@@ -41,53 +50,119 @@
       padding: 12px 12px;
       border-radius: 12px;
       border: 1px solid var(--border);
-      background: rgba(11,15,23,.55);
+      background: #fff;
       color: var(--text);
       outline: none;
       font-size: 16px;
     }
-    input:focus{border-color: rgba(96,165,250,.55)}
+    input:focus{
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+    }
     .row{display:grid; gap:8px}
+
+    .note{
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .banknotes{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:10px;
+      margin-top: 8px;
+    }
+    .bn{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+      padding: 10px;
+      cursor: pointer;
+      display:grid;
+      gap:8px;
+      align-content:start;
+      transition: transform .08s ease, border-color .12s ease, box-shadow .12s ease;
+      user-select:none;
+    }
+    .bn:hover{
+      border-color: rgba(37,99,235,.35);
+      box-shadow: 0 10px 25px rgba(2,6,23,.08);
+      transform: translateY(-1px);
+    }
+    .bn:active{transform: translateY(0px) scale(.99)}
+    .bn img{
+      width:100%;
+      height:72px;
+      object-fit:cover;
+      border-radius: 10px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: linear-gradient(135deg, rgba(37,99,235,.10), rgba(22,163,74,.08));
+    }
+    .bn .cap{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-weight:800;
+      font-variant-numeric: tabular-nums;
+      font-size: 14px;
+    }
+    .bn .cap span{color: var(--muted); font-weight:700}
+
     .result{
       margin-top: 10px;
       padding: 14px;
       border-radius: 14px;
       border: 1px solid var(--border);
-      background: rgba(11,15,23,.45);
+      background: rgba(37,99,235,.06);
     }
     .big{
       font-size: 34px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: -.5px;
       margin: 2px 0 4px;
       line-height: 1.1;
+      font-variant-numeric: tabular-nums;
     }
     .small{color: var(--muted); font-size: 13px}
-    .warn{color:#fca5a5}
+    .warn{color: var(--warn)}
+
     .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
     button{
       cursor:pointer;
       border:1px solid var(--border);
-      background: rgba(17,24,39,.45);
+      background: #fff;
       color: var(--text);
       padding: 11px 14px;
       border-radius: 12px;
-      font-weight: 700;
+      font-weight: 800;
+      transition: border-color .12s ease, box-shadow .12s ease, transform .08s ease;
     }
-    button:hover{border-color: rgba(96,165,250,.55)}
+    button:hover{
+      border-color: rgba(37,99,235,.35);
+      box-shadow: 0 10px 25px rgba(2,6,23,.08);
+      transform: translateY(-1px);
+    }
+    button:active{transform: translateY(0px)}
     .primary{
       border-color: transparent;
-      background: linear-gradient(135deg, rgba(96,165,250,.95), rgba(34,197,94,.75));
-      color:#07111f;
+      background: linear-gradient(135deg, rgba(37,99,235,.95), rgba(22,163,74,.85));
+      color:#fff;
     }
-    .mono{font-variant-numeric: tabular-nums}
+    .ghost{
+      background: rgba(2,6,23,.03);
+    }
+
+    @media (max-width: 720px){
+      .banknotes{grid-template-columns: repeat(2, minmax(0, 1fr));}
+    }
   </style>
 </head>
 <body>
   <main class="card">
     <h1>Ресто в евро</h1>
     <p class="hint">
-      Въвеждаш сметката (лв) и даденото (лв). Получаваш ресто в <b>EUR</b> по курс <b class="mono">1.95583</b>.
+      Въвеждаш сметката (лв) и даденото (лв). Получаваш ресто в <b>EUR</b> по курс <b>1.95583</b>.
     </p>
 
     <div class="grid">
@@ -99,17 +174,46 @@
       <div class="row">
         <label for="paid">Дадени пари от клиента (лв)</label>
         <input id="paid" inputmode="decimal" placeholder="напр. 50.00" />
+        <div class="note">Бързи банкноти: натисни за да добавиш към “Дадени пари”.</div>
+
+        <!-- Снимкови бутони (банкноти) -->
+        <div class="banknotes" id="banknotes">
+          <!-- Смени src с твоите картинки -->
+          <button class="bn" type="button" data-value="2">
+            <img src="images/2lv.jpg" alt="2 лв" />
+            <div class="cap"><strong>2</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value="5">
+            <img src="images/5lv.jpg" alt="5 лв" />
+            <div class="cap"><strong>5</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value="10">
+            <img src="images/10lv.jpg" alt="10 лв" />
+            <div class="cap"><strong>10</strong><span>лв</span></div>
+          </button>
+
+          <button class="bn" type="button" data-value="20">
+            <img src="images/20lv.jpg" alt="20 лв" />
+            <div class="cap"><strong>20</strong><span>лв</span></div>
+          </button>
+        </div>
+
+        <div class="btns" style="margin-top:10px">
+          <button class="ghost" id="clearPaidBtn" type="button">Изчисти дадено</button>
+        </div>
       </div>
 
       <div class="result" aria-live="polite">
         <div class="small">Ресто за връщане (EUR)</div>
-        <div id="eur" class="big mono">0.00</div>
+        <div id="eur" class="big">0.00</div>
         <div id="info" class="small"></div>
       </div>
 
       <div class="btns">
         <button class="primary" id="calcBtn" type="button">Изчисли</button>
-        <button id="clearBtn" type="button">Изчисти</button>
+        <button id="clearAllBtn" type="button">Изчисти всичко</button>
       </div>
     </div>
   </main>
@@ -121,31 +225,40 @@
     const paidEl = document.getElementById('paid');
     const eurEl  = document.getElementById('eur');
     const infoEl = document.getElementById('info');
+
     const calcBtn = document.getElementById('calcBtn');
-    const clearBtn = document.getElementById('clearBtn');
+    const clearPaidBtn = document.getElementById('clearPaidBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const banknotesWrap = document.getElementById('banknotes');
 
     function parseBGNumber(value){
-      // позволява и запетая
       if (typeof value !== 'string') return NaN;
       const v = value.trim().replace(',', '.');
       return v === '' ? NaN : Number(v);
     }
 
     function fmt2(n){
-      // 2 знака след десетичната
       return (Math.round(n * 100) / 100).toFixed(2);
     }
 
+    function setWarn(text){
+      infoEl.textContent = text;
+      infoEl.classList.add('warn');
+    }
+
+    function clearWarn(){
+      infoEl.classList.remove('warn');
+    }
+
     function calculate(){
+      clearWarn();
+
       const bill = parseBGNumber(billEl.value);
       const paid = parseBGNumber(paidEl.value);
 
-      infoEl.classList.remove('warn');
-
       if (!Number.isFinite(bill) || !Number.isFinite(paid)) {
         eurEl.textContent = "0.00";
-        infoEl.textContent = "Въведи валидни числа (можеш и със запетая).";
-        infoEl.classList.add('warn');
+        setWarn("Въведи валидни числа (можеш и със запетая).");
         return;
       }
 
@@ -153,27 +266,47 @@
 
       if (changeBGN < 0) {
         eurEl.textContent = "0.00";
-        infoEl.textContent = `Недостатъчна сума: липсват ${fmt2(Math.abs(changeBGN))} лв.`;
-        infoEl.classList.add('warn');
+        setWarn(`Недостатъчна сума: липсват ${fmt2(Math.abs(changeBGN))} лв.`);
         return;
       }
 
       const changeEUR = changeBGN / RATE;
-
       eurEl.textContent = fmt2(changeEUR);
       infoEl.textContent = `Ресто: ${fmt2(changeBGN)} лв ÷ ${RATE} = ${fmt2(changeEUR)} EUR`;
     }
 
-    function clearAll(){
+    function addToPaid(value){
+      const current = parseBGNumber(paidEl.value);
+      const next = (Number.isFinite(current) ? current : 0) + value;
+      paidEl.value = fmt2(next);
+      calculate();
+      paidEl.focus();
+    }
+
+    // Click on banknote buttons (event delegation)
+    banknotesWrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-value]');
+      if (!btn) return;
+      const v = Number(btn.getAttribute('data-value'));
+      if (Number.isFinite(v)) addToPaid(v);
+    });
+
+    calcBtn.addEventListener('click', calculate);
+
+    clearPaidBtn.addEventListener('click', () => {
+      paidEl.value = '';
+      calculate();
+      paidEl.focus();
+    });
+
+    clearAllBtn.addEventListener('click', () => {
       billEl.value = '';
       paidEl.value = '';
       eurEl.textContent = "0.00";
       infoEl.textContent = '';
+      clearWarn();
       billEl.focus();
-    }
-
-    calcBtn.addEventListener('click', calculate);
-    clearBtn.addEventListener('click', clearAll);
+    });
 
     // Автоматично пресмятане при писане
     [billEl, paidEl].forEach(el => el.addEventListener('input', calculate));
