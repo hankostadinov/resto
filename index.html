@@ -282,159 +282,74 @@
   </main>
 
   <script>
-    const RATE = 1.95583; // BGN per 1 EUR
+  const RATE = 1.95583;
+  const RATE_NUM = 195583;   // 1.95583 * 100000
+  const RATE_DEN = 100000;
 
-    const billEl = document.getElementById('bill');
-    const paidEl = document.getElementById('paid');
+  // ... останалият ти код остава ...
 
-    const eurEl = document.getElementById('eur');
-    const bgnLeftEl = document.getElementById('bgnLeft');
-    const infoEl = document.getElementById('info');
+  function parseBGNumber(value){
+    if (typeof value !== 'string') return NaN;
+    const v = value.trim().replace(',', '.');
+    return v === '' ? NaN : Number(v);
+  }
 
-    const banknotesWrap = document.getElementById('banknotes');
-    const pickedListEl = document.getElementById('pickedList');
+  function fmt2(n){
+    return (Math.round(n * 100) / 100).toFixed(2);
+  }
 
-    const calcBtn = document.getElementById('calcBtn');
-    const undoBtn = document.getElementById('undoBtn');
-    const clearPaidBtn = document.getElementById('clearPaidBtn');
-    const clearAllBtn = document.getElementById('clearAllBtn');
+  function clearWarn(){ infoEl.classList.remove('warn'); }
+  function setWarn(text){
+    infoEl.textContent = text;
+    infoEl.classList.add('warn');
+  }
 
-    const picked = []; // [{value, label}]
+  function calculate(){
+    clearWarn();
 
-    function parseBGNumber(value){
-      if (typeof value !== 'string') return NaN;
-      const v = value.trim().replace(',', '.');
-      return v === '' ? NaN : Number(v);
-    }
+    const bill = parseBGNumber(billEl.value);
+    const paid = parseBGNumber(paidEl.value);
 
-    // Винаги работим със стотинки (2 знака)
-    function round2(n){ return Math.round(n * 100) / 100; }
-    function fmt2(n){ return round2(n).toFixed(2); }
-
-    // EUR се връща в евро-центове, но без да “надскача” (floor)
-    function floorToCents(eur){
-      return Math.floor(eur * 100 + 1e-9) / 100; // малка защита от floating грешки
-    }
-
-    function clearWarn(){ infoEl.classList.remove('warn'); }
-    function setWarn(text){
-      infoEl.textContent = text;
-      infoEl.classList.add('warn');
-    }
-
-    function pickedSum(){
-      return round2(picked.reduce((s, x) => s + x.value, 0));
-    }
-
-    function updatePickedUI(){
-      pickedListEl.textContent = picked.length ? picked.map(x => x.label).join(", ") : "—";
-      paidEl.value = fmt2(pickedSum());
-    }
-
-    function calculate(){
-      clearWarn();
-
-      const bill = parseBGNumber(billEl.value);
-      const paid = parseBGNumber(paidEl.value);
-
-      if (!Number.isFinite(bill) || !Number.isFinite(paid)) {
-        eurEl.textContent = "0.00";
-        bgnLeftEl.textContent = "0.00";
-        setWarn("Въведи валидни числа (можеш и със запетая).");
-        return;
-      }
-
-      const changeBGN = round2(paid - bill);
-
-      if (changeBGN < 0) {
-        eurEl.textContent = "0.00";
-        bgnLeftEl.textContent = "0.00";
-        setWarn(`Недостатъчна сума: липсват ${fmt2(Math.abs(changeBGN))} лв.`);
-        return;
-      }
-
-      // 1) Колко евро се падат точно
-      const exactEUR = changeBGN / RATE;
-
-      // 2) Връщаме евро ЗАКРЪГЛЕНО НАДОЛУ до 0.01 EUR (за да не дадем повече)
-      const eurReturn = floorToCents(exactEUR);
-
-      // 3) Колко лева покриват тези евро (закръгляме до стотинки)
-      const bgnCovered = round2(eurReturn * RATE);
-
-      // 4) Остатък в лева (ако има)
-      let bgnLeft = round2(changeBGN - bgnCovered);
-      if (bgnLeft < 0) bgnLeft = 0; // защита от микроскопични отрицателни стойности
-
-      eurEl.textContent = fmt2(eurReturn);
-      bgnLeftEl.textContent = fmt2(bgnLeft);
-
-      // инфо (по желание, за проверка)
-      infoEl.textContent =
-        `Общо ресто: ${fmt2(changeBGN)} лв → EUR: ${fmt2(eurReturn)} + остатък: ${fmt2(bgnLeft)} лв`;
-    }
-
-    function addPicked(value, label){
-      picked.push({ value, label });
-      updatePickedUI();
-      calculate();
-      paidEl.focus();
-    }
-
-    function undoLast(){
-      if (!picked.length) return;
-      picked.pop();
-      updatePickedUI();
-      calculate();
-      paidEl.focus();
-    }
-
-    function clearPaid(){
-      picked.length = 0;
-      paidEl.value = '';
-      pickedListEl.textContent = "—";
-      calculate();
-      paidEl.focus();
-    }
-
-    banknotesWrap.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-value]');
-      if (!btn) return;
-
-      const value = Number(btn.getAttribute('data-value'));
-      const label = btn.getAttribute('data-label') || String(value);
-
-      if (Number.isFinite(value)) addPicked(value, label);
-    });
-
-    // ако се пише ръчно -> чистим списъка, за да няма разминаване
-    paidEl.addEventListener('input', () => {
-      if (document.activeElement === paidEl) {
-        picked.length = 0;
-        pickedListEl.textContent = "—";
-      }
-      calculate();
-    });
-
-    calcBtn.addEventListener('click', calculate);
-    undoBtn.addEventListener('click', undoLast);
-    clearPaidBtn.addEventListener('click', clearPaid);
-
-    clearAllBtn.addEventListener('click', () => {
-      billEl.value = '';
-      picked.length = 0;
-      paidEl.value = '';
-      pickedListEl.textContent = "—";
+    if (!Number.isFinite(bill) || !Number.isFinite(paid)) {
       eurEl.textContent = "0.00";
       bgnLeftEl.textContent = "0.00";
-      infoEl.textContent = '';
-      clearWarn();
-      billEl.focus();
-    });
+      setWarn("Въведи валидни числа (можеш и със запетая).");
+      return;
+    }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') calculate();
-    });
-  </script>
+    // работим в стотинки
+    const changeSt = Math.round((paid - bill) * 100);
+
+    if (changeSt < 0) {
+      eurEl.textContent = "0.00";
+      bgnLeftEl.textContent = "0.00";
+      setWarn(`Недостатъчна сума: липсват ${fmt2(Math.abs(changeSt)/100)} лв.`);
+      return;
+    }
+
+    // Покритие в стотинки за E евроцента:
+    // bgn_st = round( (E/100) * (195583/100000) * 100 )
+    //      = round( E * 195583 / 100000 )
+    function coveredSt(E){
+      return Math.round((E * RATE_NUM) / RATE_DEN);
+    }
+
+    // първа груба оценка
+    let E = Math.floor((changeSt * RATE_DEN) / RATE_NUM);
+
+    // корекция (за да гарантираме, че не надвишаваме)
+    while (coveredSt(E) > changeSt) E--;
+    while (coveredSt(E + 1) <= changeSt) E++;
+
+    const eurReturn = E / 100;
+    const leftSt = changeSt - coveredSt(E);
+
+    eurEl.textContent = fmt2(eurReturn);
+    bgnLeftEl.textContent = fmt2(leftSt / 100);
+
+    infoEl.textContent = `Общо ресто: ${fmt2(changeSt/100)} лв → ${fmt2(eurReturn)} EUR + ${fmt2(leftSt/100)} лв`;
+  }
+</script>
+
 </body>
 </html>
