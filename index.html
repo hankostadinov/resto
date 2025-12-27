@@ -260,6 +260,13 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* по-малък шрифт за BGN */
+    #bgnOut.big{ font-size: 26px; }
+
+    /* цветове */
+    #eur.big{ color: var(--blue); }
+    #bgnOut.big{ color: var(--green); }
+
     .resultControls{
       display:flex;
       align-items:center;
@@ -286,6 +293,18 @@
       gap:8px;
       justify-items:start;
     }
+    .billTop{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .billStatus{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 900;
+      white-space:nowrap;
+    }
     .billRow{
       display:flex;
       gap:10px;
@@ -306,6 +325,8 @@
       .resultControls{gap:8px}
       .resultControls .ctlLabel{width:100%}
       .billRow{width:100%}
+      .billTop{width:100%}
+      .billStatus{width:100%}
     }
   </style>
 </head>
@@ -318,14 +339,20 @@
     </p>
 
     <div class="grid">
-      <!-- Сметка: toggle НАД полето + поле + бутон изчистване -->
+      <!-- Сметка: toggle НАД полето + статус до него + поле + бутон изчистване -->
       <div>
         <label>Обща сметка на клиента</label>
 
         <div class="billBlock">
-          <div class="toggle" role="group" aria-label="Валута на сметката">
-            <button type="button" id="billBGNBtn" class="active">BGN</button>
-            <button type="button" id="billEURBtn">EUR</button>
+          <div class="billTop">
+            <!-- (1) Разменени: EUR вляво, BGN вдясно. EUR активно по подразбиране -->
+            <div class="toggle" role="group" aria-label="Валута на сметката">
+              <button type="button" id="billEURBtn" class="active">EUR</button>
+              <button type="button" id="billBGNBtn">BGN</button>
+            </div>
+
+            <!-- (2) статусът е тук, до toggle -->
+            <div class="billStatus" id="billHint">Сметката е в евро (EUR).</div>
           </div>
 
           <div class="billRow">
@@ -333,8 +360,6 @@
             <button class="action ghost" id="clearBillBtn" type="button">Изчисти сметката</button>
           </div>
         </div>
-
-        <div class="note" id="billHint">Сметката е в лева (BGN).</div>
       </div>
 
       <!-- Дадени: поле + бутон срещу него -->
@@ -351,7 +376,7 @@
           </label>
         </div>
 
-        <div class="note">Ако включиш “Покажи банкнотите”, можеш да добавяш сума с бутоните.</div>
+        <!-- (3) махнат е надписът "Ако включиш..." -->
 
         <!-- Секцията с натиснати + банкноти е скрита по подразбиране -->
         <div class="banknotesSection" id="banknotesSection" hidden>
@@ -467,21 +492,20 @@
     const clearAllBtn = document.getElementById('clearAllBtn');
     const calcBtn = document.getElementById('calcBtn');
 
-    const billBGNBtn = document.getElementById('billBGNBtn');
+    // (1) Разменени бутони (EUR вляво, BGN вдясно)
     const billEURBtn = document.getElementById('billEURBtn');
+    const billBGNBtn = document.getElementById('billBGNBtn');
     const billHint = document.getElementById('billHint');
 
     const modeMixedBtn = document.getElementById('modeMixedBtn');
     const modeBgnOnlyBtn = document.getElementById('modeBgnOnlyBtn');
     const modeHint = document.getElementById('modeHint');
 
-    // валута на сметката: "BGN" или "EUR"
-    let billCurrency = "BGN";
+    // (1) EUR по подразбиране
+    let billCurrency = "EUR";
 
-    // режим на връщане: "MIXED" (EUR + BGN) или "BGN_ONLY"
     let changeMode = "MIXED";
 
-    // натиснати стойности в стотинки: [{st, label}]
     const picked = [];
 
     function parseNumber(value){
@@ -633,8 +657,8 @@
     }
 
     // ---- Events ----
-    billBGNBtn.addEventListener('click', () => setBillCurrency("BGN"));
     billEURBtn.addEventListener('click', () => setBillCurrency("EUR"));
+    billBGNBtn.addEventListener('click', () => setBillCurrency("BGN"));
 
     modeMixedBtn.addEventListener('click', () => setChangeMode("MIXED"));
     modeBgnOnlyBtn.addEventListener('click', () => setChangeMode("BGN_ONLY"));
@@ -680,6 +704,9 @@
       clearWarn();
       billEl.focus();
     });
+
+    // Инициализация: EUR активен по подразбиране (и визуално, и логически)
+    setBillCurrency("EUR");
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') calculate();
