@@ -14,6 +14,7 @@
       --shadow: 0 18px 40px rgba(2,6,23,.12);
       --radius: 16px;
       --warn:#b91c1c;
+
       --blue:#2563eb;
       --green:#16a34a;
     }
@@ -22,189 +23,632 @@
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      background: var(--bg);
+      background:
+        radial-gradient(900px 520px at 15% -10%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(800px 520px at 95% 10%, rgba(22,163,74,.12), transparent 55%),
+        var(--bg);
       min-height:100vh;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:22px;
+      padding: 22px;
     }
     .card{
       width: min(980px, 100%);
       background: var(--card);
+      border:1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding:18px;
+      padding: 18px;
     }
-    h1{margin:0 0 10px}
-    .hint{font-size:14px;color:var(--muted)}
+    h1{font-size: 20px; margin:0 0 10px}
+    .hint{color: var(--muted); margin:0 0 14px; font-size:14px; line-height:1.35}
 
-    .grid{display:grid;gap:12px}
-    label{font-size:13px;color:var(--muted);font-weight:700}
+    .grid{display:grid; gap:12px}
+    label{font-size: 13px; color: var(--muted); display:block; margin-bottom:8px}
 
+    .inlineField{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
     input{
-      padding:12px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      font-size:16px;
-      width:240px;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      font-size: 16px;
+      font-variant-numeric: tabular-nums;
+      height: 44px;
+      width: 240px;
+      max-width: 100%;
+    }
+    input:focus{
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.12);
     }
 
-    button{
-      padding:12px 14px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background:#fff;
-      font-weight:700;
+    button.action{
       cursor:pointer;
+      border:1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-weight: 900;
+      transition: border-color .12s ease, box-shadow .12s ease, transform .08s ease, background .12s ease, color .12s ease;
+      white-space:nowrap;
+      height: 44px;
+    }
+    button.action:hover{
+      border-color: rgba(37,99,235,.35);
+      box-shadow: 0 10px 25px rgba(2,6,23,.08);
+      transform: translateY(-1px);
+    }
+    button.action:active{transform: translateY(0px)}
+    .ghost{background: rgba(2,6,23,.03) !important}
+    .primary{
+      border-color: transparent !important;
+      background: linear-gradient(135deg, rgba(37,99,235,.95), rgba(22,163,74,.85)) !important;
+      color:#fff !important;
     }
 
+    /* Toggle base */
     .toggle{
       display:inline-flex;
       border:1px solid var(--border);
-      border-radius:12px;
+      border-radius: 12px;
       overflow:hidden;
+      height:44px;
+      background: rgba(2,6,23,.03);
+    }
+    .toggle button{
+      border:0;
+      background: transparent;
+      padding: 0 14px;
+      cursor:pointer;
+      font-weight:900;
+      color: var(--muted);
+      height:44px;
+      transition: background .12s ease, color .12s ease, box-shadow .12s ease;
     }
     .toggle button.active{
-      color:#fff;
+      color: #fff;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.35);
     }
-    #billEURBtn.active{background:var(--blue)}
-    #billBGNBtn.active{background:var(--green)}
 
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    /* Bill currency toggle color states */
+    #billBGNBtn.active{ background: var(--green); }
+    #billEURBtn.active{ background: var(--blue); }
+
+    /* Change mode toggle (blue/green too) */
+    #modeEURBtn.active{ background: var(--blue); }
+    #modeBGNBtn.active{ background: var(--green); }
+
+    /* Switch (checkbox) */
+    .switch{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      user-select:none;
+    }
+    .switch input{
+      width:auto;
+      height:auto;
+      margin:0;
+      accent-color: var(--blue);
+      transform: scale(1.15);
+    }
+    .switch span{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 900;
+      white-space:nowrap;
+    }
+
+    .pickedRow{
+      display:flex;
+      align-items:stretch;
+      gap:10px;
+      margin-top: 10px;
+      flex-wrap:wrap;
+    }
+    .picked{
+      flex: 1 1 420px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(2,6,23,.03);
+      padding: 10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:baseline;
+      min-height:44px;
+    }
+    .picked .title{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 800;
+      white-space:nowrap;
+    }
+    .picked .list{
+      font-size: 14px;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      overflow-wrap:anywhere;
+    }
+
+    .banknotes{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:10px;
+      margin-top: 10px;
+    }
+    .bn{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+      padding: 10px;
+      cursor: pointer;
+      display:grid;
+      gap:8px;
+      align-content:start;
+      transition: transform .08s ease, border-color .12s ease, box-shadow .12s ease;
+      user-select:none;
+    }
+    .bn:hover{
+      border-color: rgba(37,99,235,.35);
+      box-shadow: 0 10px 25px rgba(2,6,23,.08);
+      transform: translateY(-1px);
+    }
+    .bn:active{transform: translateY(0px) scale(.99)}
+    .bn img{
+      width:100%;
+      height:64px;
+      object-fit:cover;
+      border-radius: 10px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: linear-gradient(135deg, rgba(37,99,235,.10), rgba(22,163,74,.08));
+    }
+    .bn .cap{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-weight:900;
+      font-variant-numeric: tabular-nums;
+      font-size: 14px;
+    }
+    .bn .cap span{color: var(--muted); font-weight:800}
+
+    .banknotesSection[hidden]{ display:none !important; }
 
     .result{
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(37,99,235,.06);
       display:grid;
-      grid-template-columns:1fr 1fr;
       gap:12px;
-      background:rgba(37,99,235,.06);
-      padding:14px;
-      border-radius:14px;
+    }
+    .resultGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      align-items:start;
     }
     .kpi{
-      background:#fff;
-      border-radius:12px;
-      padding:12px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.6);
+      border-radius: 12px;
+      padding: 10px 12px;
     }
-    .kpi .label{font-size:13px;color:var(--muted)}
-    .kpi .value{font-size:34px;font-weight:900}
-    #eur{color:var(--blue)}
-    #bgn{color:var(--green);font-size:26px}
+    .kpi .small{color: var(--muted); font-size: 13px}
+    .kpi .big{
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -.5px;
+      margin: 2px 0 0;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
 
-    .info{font-size:13px;color:var(--muted)}
-    .warn{color:var(--warn)}
+    /* EUR по-голям + син */
+    #eur.big{ color: var(--blue); }
+
+    /* BGN по-малък + зелен */
+    #bgn.big{ color: var(--green); font-size: 26px; }
+
+    .resultControls{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      border-top: 1px solid rgba(15,23,42,.10);
+      padding-top: 12px;
+    }
+    .resultControls .ctlLabel{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 900;
+      white-space:nowrap;
+    }
+
+    .billBlock{ display:grid; gap:8px; justify-items:start; }
+    .billTop{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .billStatus{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 900;
+      white-space:nowrap;
+    }
+    .billRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+    .warn{color: var(--warn)}
+    #info{color: var(--muted); font-size: 13px}
+
+    .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+
+    @media (max-width: 780px){
+      .resultGrid{grid-template-columns: 1fr;}
+    }
+    @media (max-width: 560px){
+      .banknotes{grid-template-columns: repeat(2, minmax(0, 1fr));}
+      input{width:100%;}
+      .inlineField{width:100%;}
+      button.action{width:100%;}
+      .toggle{width:100%;}
+      .toggle button{flex:1}
+      .resultControls{gap:8px}
+      .resultControls .ctlLabel{width:100%}
+      .billRow{width:100%}
+      .billTop{width:100%}
+      .billStatus{width:100%}
+    }
   </style>
 </head>
-
 <body>
-<div class="card">
-  <h1>Калкулатор за ресто</h1>
-  <p class="hint">
-    Сумата в евро е ориентировъчна (закръглена до 0.01 EUR).  
-    Реалното ресто за връщане е в лева.
-  </p>
+  <main class="card">
+    <h1>Ресто (EUR или BGN)</h1>
+    <p class="hint">
+      Избираш валута на сметката (EUR/BGN). “Дадени пари” са в <b>лева</b>.
+      При връщане в EUR сумата се закръгля към най-близък евроцент (0.01 EUR) — без “остатък”.
+      Курс: <b>1.95583</b>.
+    </p>
 
-  <div class="grid">
-    <!-- ОБЩА СМЕТКА -->
-    <div>
-      <label>Обща сметка на клиента</label>
-      <div class="row">
-        <div class="toggle">
-          <button id="billEURBtn" class="active">EUR</button>
-          <button id="billBGNBtn">BGN</button>
+    <div class="grid">
+      <!-- Сметка: toggle + статус до него + поле + бутон изчистване -->
+      <div>
+        <label>Обща сметка на клиента</label>
+
+        <div class="billBlock">
+          <div class="billTop">
+            <div class="toggle" role="group" aria-label="Валута на сметката">
+              <button type="button" id="billEURBtn" class="active">EUR</button>
+              <button type="button" id="billBGNBtn">BGN</button>
+            </div>
+            <div class="billStatus" id="billHint">Сметката е в евро (EUR).</div>
+          </div>
+
+          <div class="billRow">
+            <input id="bill" inputmode="decimal" placeholder="напр. 23.40" />
+            <button class="action ghost" id="clearBillBtn" type="button">Изчисти сметката</button>
+          </div>
         </div>
-        <span id="billHint">Сметката е в евро (EUR)</span>
       </div>
-      <div class="row">
-        <input id="bill" placeholder="напр. 23.40">
-        <button onclick="clearBill()">Изчисти</button>
+
+      <!-- Дадени: поле + бутон + суич -->
+      <div>
+        <label for="paid">Дадени пари от клиента (лв)</label>
+        <div class="inlineField">
+          <input id="paid" inputmode="decimal" placeholder="напр. 50.00" />
+          <button class="action ghost" id="clearPaidBtn" type="button">Изчисти дадено</button>
+
+          <label class="switch" style="margin-left:auto;">
+            <input type="checkbox" id="showBanknotesSwitch" />
+            <span>Покажи банкнотите</span>
+          </label>
+        </div>
+
+        <div class="banknotesSection" id="banknotesSection" hidden>
+          <div class="pickedRow" aria-live="polite">
+            <div class="picked">
+              <div class="title">Натиснати:</div>
+              <div class="list" id="pickedList">—</div>
+            </div>
+            <button class="action ghost" id="undoBtn" type="button">← Махни последната</button>
+          </div>
+
+          <div class="banknotes" id="banknotes">
+            <!-- Смени src с твоите картинки -->
+            <button class="bn" type="button" data-value-st="50" data-label="0.50">
+              <img src="images/050lv.jpg" alt="50 ст" />
+              <div class="cap"><strong>0.50</strong><span>лв</span></div>
+            </button>
+            <button class="bn" type="button" data-value-st="100" data-label="1">
+              <img src="images/1lv.jpg" alt="1 лв" />
+              <div class="cap"><strong>1</strong><span>лв</span></div>
+            </button>
+            <button class="bn" type="button" data-value-st="200" data-label="2">
+              <img src="images/2lv.jpg" alt="2 лв" />
+              <div class="cap"><strong>2</strong><span>лв</span></div>
+            </button>
+            <button class="bn" type="button" data-value-st="500" data-label="5">
+              <img src="images/5lv.jpg" alt="5 лв" />
+              <div class="cap"><strong>5</strong><span>лв</span></div>
+            </button>
+            <button class="bn" type="button" data-value-st="1000" data-label="10">
+              <img src="images/10lv.jpg" alt="10 лв" />
+              <div class="cap"><strong>10</strong><span>лв</span></div>
+            </button>
+            <button class="bn" type="button" data-value-st="2000" data-label="20">
+              <img src="images/20lv.jpg" alt="20 лв" />
+              <div class="cap"><strong>20</strong><span>лв</span></div>
+            </button>
+            <button class="bn" type="button" data-value-st="5000" data-label="50">
+              <img src="images/50lv.jpg" alt="50 лв" />
+              <div class="cap"><strong>50</strong><span>лв</span></div>
+            </button>
+            <button class="bn" type="button" data-value-st="10000" data-label="100">
+              <img src="images/100lv.jpg" alt="100 лв" />
+              <div class="cap"><strong>100</strong><span>лв</span></div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- РЕСТО: показваме И двата резултата, но реално използваем е само избраният режим -->
+      <div class="result" aria-live="polite">
+        <div class="resultGrid">
+          <div class="kpi">
+            <div class="small">Ресто за връщане (EUR)</div>
+            <div id="eur" class="big">0.00</div>
+          </div>
+          <div class="kpi">
+            <div class="small">Ресто за връщане (BGN)</div>
+            <div id="bgn" class="big">0.00</div>
+          </div>
+        </div>
+
+        
+
+        <div id="info"></div>
+      </div>
+
+      <div class="btns">
+        <button class="action primary" id="calcBtn" type="button">Изчисли</button>
+        <button class="action" id="clearAllBtn" type="button">Изчисти всичко</button>
       </div>
     </div>
+  </main>
 
-    <!-- ДАДЕНИ ПАРИ -->
-    <div>
-      <label>Дадени пари от клиента (лв)</label>
-      <div class="row">
-        <input id="paid" placeholder="напр. 50.00">
-        <button onclick="clearPaid()">Изчисти</button>
-      </div>
-    </div>
+  <script>
+    // 1 EUR = 1.95583 BGN
+    // Работим в стотинки, където има смисъл.
+    const RATE = 1.95583;
 
-    <!-- РЕЗУЛТАТ -->
-    <div class="result">
-      <div class="kpi">
-        <div class="label">Ресто (EUR – ориентировъчно)</div>
-        <div id="eur" class="value">0.00</div>
-      </div>
-      <div class="kpi">
-        <div class="label">Ресто за връщане (BGN)</div>
-        <div id="bgn" class="value">0.00</div>
-      </div>
-    </div>
+    const billEl = document.getElementById('bill');
+    const paidEl = document.getElementById('paid');
 
-    <div id="info" class="info"></div>
+    const eurEl = document.getElementById('eur');
+    const bgnEl = document.getElementById('bgn');
+    const infoEl = document.getElementById('info');
 
-    <div class="row">
-      <button onclick="calculate()">Изчисли</button>
-      <button onclick="clearAll()">Изчисти всичко</button>
-    </div>
-  </div>
-</div>
+    const banknotesSection = document.getElementById('banknotesSection');
+    const showBanknotesSwitch = document.getElementById('showBanknotesSwitch');
+    const banknotesWrap = document.getElementById('banknotes');
+    const pickedListEl = document.getElementById('pickedList');
 
-<script>
-const RATE = 1.95583;
-let billCurrency = "EUR";
+    const undoBtn = document.getElementById('undoBtn');
+    const clearPaidBtn = document.getElementById('clearPaidBtn');
+    const clearBillBtn = document.getElementById('clearBillBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const calcBtn = document.getElementById('calcBtn');
 
-const bill = document.getElementById("bill");
-const paid = document.getElementById("paid");
-const eurEl = document.getElementById("eur");
-const bgnEl = document.getElementById("bgn");
-const info = document.getElementById("info");
-const billHint = document.getElementById("billHint");
+    const billEURBtn = document.getElementById('billEURBtn');
+    const billBGNBtn = document.getElementById('billBGNBtn');
+    const billHint = document.getElementById('billHint');
 
-document.getElementById("billEURBtn").onclick = () => setCurrency("EUR");
-document.getElementById("billBGNBtn").onclick = () => setCurrency("BGN");
+    const modeEURBtn = document.getElementById('modeEURBtn');
+    const modeBGNBtn = document.getElementById('modeBGNBtn');
+    const modeHint = document.getElementById('modeHint');
 
-function setCurrency(c){
-  billCurrency = c;
-  billEURBtn.classList.toggle("active", c==="EUR");
-  billBGNBtn.classList.toggle("active", c==="BGN");
-  billHint.textContent = c==="EUR"
-    ? "Сметката е в евро (EUR)"
-    : "Сметката е в лева (BGN)";
-  calculate();
-}
+    // По подразбиране: сметка в EUR (както поиска), ресто в EUR
+    let billCurrency = "EUR";
+    let changeCurrency = "EUR";
 
-function calculate(){
-  const billVal = Number(bill.value.replace(',','.'));
-  const paidVal = Number(paid.value.replace(',','.'));
-  if(!isFinite(billVal) || !isFinite(paidVal)) return;
+    const picked = []; // {st, label}
 
-  const billBGN = billCurrency==="EUR" ? billVal*RATE : billVal;
-  const change = paidVal - billBGN;
+    function parseNumber(value){
+      if (typeof value !== 'string') return NaN;
+      const v = value.trim().replace(',', '.');
+      return v === '' ? NaN : Number(v);
+    }
 
-  if(change < 0){
-    info.textContent = "Недостатъчна сума.";
-    info.classList.add("warn");
-    eurEl.textContent = "0.00";
-    bgnEl.textContent = "0.00";
-    return;
-  }
-  info.classList.remove("warn");
+    function fmt2(n){
+      return Number.isFinite(n) ? n.toFixed(2) : "0.00";
+    }
 
-  const eurRounded = Math.round((change/RATE)*100)/100;
-  eurEl.textContent = eurRounded.toFixed(2);
-  bgnEl.textContent = change.toFixed(2);
-}
+    function clearWarn(){ infoEl.classList.remove('warn'); }
+    function setWarn(text){
+      infoEl.textContent = text;
+      infoEl.classList.add('warn');
+    }
 
-function clearBill(){ bill.value=""; calculate(); }
-function clearPaid(){ paid.value=""; calculate(); }
-function clearAll(){
-  bill.value=""; paid.value="";
-  eurEl.textContent="0.00";
-  bgnEl.textContent="0.00";
-  info.textContent="";
-}
-</script>
+    function pickedSumSt(){
+      return picked.reduce((s, x) => s + x.st, 0);
+    }
+
+    function updatePickedUIAndPaid(){
+      pickedListEl.textContent = picked.length ? picked.map(x => x.label).join(", ") : "—";
+      paidEl.value = (pickedSumSt() / 100).toFixed(2);
+    }
+
+    function billToBGN(billValue){
+      if (!Number.isFinite(billValue)) return NaN;
+      return billCurrency === "BGN" ? billValue : billValue * RATE;
+    }
+
+    function calculate(){
+      clearWarn();
+
+      const billVal = parseNumber(billEl.value);
+      const paidVal = parseNumber(paidEl.value);
+
+      if (!Number.isFinite(billVal) || !Number.isFinite(paidVal)) {
+        eurEl.textContent = "0.00";
+        bgnEl.textContent = "0.00";
+        setWarn("Въведи валидни числа (можеш и със запетая).");
+        return;
+      }
+
+      const billBGN = billToBGN(billVal);
+      if (!Number.isFinite(billBGN)) {
+        eurEl.textContent = "0.00";
+        bgnEl.textContent = "0.00";
+        setWarn("Грешка при смятане на сметката. Провери стойността.");
+        return;
+      }
+
+      // Работим в стотинки за лева, за да е точно
+      const changeSt = Math.round((paidVal - billBGN) * 100);
+
+      if (changeSt < 0) {
+        eurEl.textContent = "0.00";
+        bgnEl.textContent = "0.00";
+        setWarn(`Недостатъчна сума: липсват ${(Math.abs(changeSt)/100).toFixed(2)} лв.`);
+        return;
+      }
+
+      const changeBGN = changeSt / 100;
+
+      // Показваме и двата варианта:
+      // - BGN: точно
+      // - EUR: закръглено до 0.01 EUR (без остатък)
+      const eurRounded = Math.round((changeBGN / RATE) * 100) / 100;
+
+      eurEl.textContent = eurRounded.toFixed(2);
+      bgnEl.textContent = changeBGN.toFixed(2);
+
+      const billLabel = billCurrency === "BGN" ? `${billVal.toFixed(2)} лв` : `${billVal.toFixed(2)} EUR`;
+
+      if (changeCurrency === "EUR") {
+        infoEl.textContent = `Сметка: ${billLabel} → ресто: ${changeBGN.toFixed(2)} лв → връщане: ${eurRounded.toFixed(2)} EUR (закръглено).`;
+      } else {
+        infoEl.textContent = `Сметка: ${billLabel} → ресто: ${changeBGN.toFixed(2)} лв → връщане: ${changeBGN.toFixed(2)} BGN.`;
+      }
+    }
+
+    function addPickedSt(st, label){
+      picked.push({ st, label });
+      updatePickedUIAndPaid();
+      calculate();
+      paidEl.focus();
+    }
+
+    function undoLast(){
+      if (!picked.length) return;
+      picked.pop();
+      updatePickedUIAndPaid();
+      calculate();
+      paidEl.focus();
+    }
+
+    function clearPaid(){
+      picked.length = 0;
+      paidEl.value = '';
+      pickedListEl.textContent = "—";
+      calculate();
+      paidEl.focus();
+    }
+
+    function clearBill(){
+      billEl.value = '';
+      calculate();
+      billEl.focus();
+    }
+
+    function setBillCurrency(next){
+      billCurrency = next;
+      billBGNBtn.classList.toggle('active', next === "BGN");
+      billEURBtn.classList.toggle('active', next === "EUR");
+      billHint.textContent = next === "BGN" ? "Сметката е в лева (BGN)." : "Сметката е в евро (EUR).";
+      calculate();
+      billEl.focus();
+    }
+
+    function setChangeCurrency(next){
+      changeCurrency = next;
+      modeEURBtn.classList.toggle('active', next === "EUR");
+      modeBGNBtn.classList.toggle('active', next === "BGN");
+      modeHint.textContent = next === "EUR"
+        ? "Връщане в евро (закръгляне до 0.01 EUR)."
+        : "Връщане само в лева (BGN).";
+      calculate();
+    }
+
+    function setBanknotesVisible(visible){
+      banknotesSection.hidden = !visible;
+    }
+
+    // ---- Events ----
+    billEURBtn.addEventListener('click', () => setBillCurrency("EUR"));
+    billBGNBtn.addEventListener('click', () => setBillCurrency("BGN"));
+
+    modeEURBtn.addEventListener('click', () => setChangeCurrency("EUR"));
+    modeBGNBtn.addEventListener('click', () => setChangeCurrency("BGN"));
+
+    setBanknotesVisible(false);
+    showBanknotesSwitch.addEventListener('change', () => {
+      setBanknotesVisible(showBanknotesSwitch.checked);
+    });
+
+    banknotesWrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-value-st]');
+      if (!btn) return;
+
+      const st = Number(btn.getAttribute('data-value-st'));
+      const label = btn.getAttribute('data-label') || String(st/100);
+
+      if (Number.isFinite(st)) addPickedSt(st, label);
+    });
+
+    paidEl.addEventListener('input', () => {
+      if (document.activeElement === paidEl) {
+        picked.length = 0;
+        pickedListEl.textContent = "—";
+      }
+      calculate();
+    });
+
+    billEl.addEventListener('input', calculate);
+
+    calcBtn.addEventListener('click', calculate);
+    if (undoBtn) undoBtn.addEventListener('click', undoLast);
+    clearPaidBtn.addEventListener('click', clearPaid);
+    clearBillBtn.addEventListener('click', clearBill);
+
+    clearAllBtn.addEventListener('click', () => {
+      billEl.value = '';
+      picked.length = 0;
+      paidEl.value = '';
+      pickedListEl.textContent = "—";
+      eurEl.textContent = "0.00";
+      bgnEl.textContent = "0.00";
+      infoEl.textContent = '';
+      clearWarn();
+      billEl.focus();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') calculate();
+    });
+
+    // Инициализация според изискванията: EUR активен по подразбиране
+    setBillCurrency("EUR");
+    setChangeCurrency("EUR");
+  </script>
 </body>
 </html>
